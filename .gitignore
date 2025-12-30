@@ -24,12 +24,10 @@ dist-ssr
 *.sw?
 
 # Environment Variables
-# Keep these ignored. You will manually upload .env.production if needed, 
-# or hardcode production URLs in the build since it's static.
 .env
 .env.*
 !.env.example
 
 # Files to ALLOW (Do not ignore)
-!dist
+!build
 !.cpanel.yml

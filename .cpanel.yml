@@ -3,15 +3,12 @@ deployment:
   tasks:
     - export DEPLOYPATH=/home3/rajugda1/mkchessacademy.com/
     
-    # 1. Copy the Frontend Build (Contents of dist to root)
-    # -R is recursive, -p preserves permissions
-    - /bin/cp -R -p dist/* $DEPLOYPATH
+    # 1. Copy the Frontend Build (Contents of build to root)
+    - /bin/cp -R -p build/* $DEPLOYPATH
     
-    # 2. Copy the Backend API (Backend folder to root/backend)
-    # We create the directory first to be safe
+    # 2. Copy the Backend API
     - /bin/mkdir -p $DEPLOYPATH/backend
     - /bin/cp -R -p backend/* $DEPLOYPATH/backend
     
-    # 3. Copy .htaccess explicitly if it's not in dist (Safety check)
-    # Since we put .htaccess in public, it should be in dist, but this ensures no issues.
-    - /bin/cp -p dist/.htaccess $DEPLOYPATH/.htaccess
+    # 3. Safety check for .htaccess (Copy from build folder)
+    - /bin/cp -p build/.htaccess $DEPLOYPATH/.htaccess
