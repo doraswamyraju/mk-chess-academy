@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/MKCA/static/css/main.090524c2.css",
+    "main.js": "/MKCA/static/js/main.5464f0c3.js",
+    "index.html": "/MKCA/index.html",
+    "main.090524c2.css.map": "/MKCA/static/css/main.090524c2.css.map",
+    "main.5464f0c3.js.map": "/MKCA/static/js/main.5464f0c3.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.090524c2.css",
+    "static/js/main.5464f0c3.js"
+  ]
+}
