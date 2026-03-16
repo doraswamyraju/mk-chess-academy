@@ -11,7 +11,7 @@ const AdminDashboard = () => {
         const fetchStats = async () => {
             const token = localStorage.getItem('adminToken');
             if (!token) {
-                navigate('/admin/login');
+                navigate('/login');
                 return;
             }
 
@@ -25,7 +25,7 @@ const AdminDashboard = () => {
                     setStats(data.stats);
                 } else if (data.status === 'unauthorized') {
                     localStorage.removeItem('adminToken');
-                    navigate('/admin/login');
+                    navigate('/login');
                 }
             } catch (err) {
                 console.error("Failed to load stats", err);

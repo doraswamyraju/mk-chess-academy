@@ -14,7 +14,7 @@ const AdminEnrolments = () => {
 
     const fetchEnrolments = async () => {
         const token = localStorage.getItem('adminToken');
-        if (!token) { navigate('/admin/login'); return; }
+        if (!token) { navigate('/login'); return; }
 
         try {
             setLoading(true);
@@ -22,7 +22,7 @@ const AdminEnrolments = () => {
             if (data.status === 'success') {
                 setEnrolments(data.enrolments || []);
             } else if (data.status === 'unauthorized') {
-                navigate('/admin/login');
+                navigate('/login');
             } else {
                 setError(data.message || 'Failed to fetch enrolments');
             }

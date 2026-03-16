@@ -107,13 +107,9 @@ const PublicApp = () => {
     };
 
     return (
-        <CursorProvider>
-            <StyleInjector />
-            <CustomCursor />
-            <Layout setPage={setPage} page={page}>
-                {renderPage()}
-            </Layout>
-        </CursorProvider>
+        <Layout setPage={setPage} page={page}>
+            {renderPage()}
+        </Layout>
     );
 };
 
@@ -121,30 +117,34 @@ const PublicApp = () => {
 const ProtectedRoute = ({ children }) => {
     const token = localStorage.getItem('adminToken');
     if (!token) {
-        return <Navigate to="/admin/login" replace />;
+        return <Navigate to="/login" replace />;
     }
     return children;
 };
 
 function App() {
     return (
-        <Router>
-            <Routes>
-                {/* Admin Routes */}
-                <Route path="/admin/login" element={<><StyleInjector /><AdminLogin /></>} />
-                <Route path="/admin" element={<ProtectedRoute><StyleInjector /><AdminLayout /></ProtectedRoute>}>
-                    <Route index element={<AdminDashboard />} />
-                    <Route path="leads" element={<AdminLeads />} />
-                    <Route path="enrolments" element={<AdminEnrolments />} />
-                    <Route path="courses" element={<AdminCourses />} />
-                    <Route path="blog" element={<AdminBlog />} />
-                    <Route path="announcements" element={<AdminAnnouncements />} />
-                </Route>
-                
-                {/* Public Site Catch-all (retains old state-based behavior) */}
-                <Route path="/*" element={<PublicApp />} />
-            </Routes>
-        </Router>
+        <CursorProvider>
+            <StyleInjector />
+            <CustomCursor />
+            <Router>
+                <Routes>
+                    {/* Admin Routes */}
+                    <Route path="/login" element={<AdminLogin />} />
+                    <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
+                        <Route index element={<AdminDashboard />} />
+                        <Route path="leads" element={<AdminLeads />} />
+                        <Route path="enrolments" element={<AdminEnrolments />} />
+                        <Route path="courses" element={<AdminCourses />} />
+                        <Route path="blog" element={<AdminBlog />} />
+                        <Route path="announcements" element={<AdminAnnouncements />} />
+                    </Route>
+                    
+                    {/* Public Site Catch-all (retains old state-based behavior) */}
+                    <Route path="/*" element={<PublicApp />} />
+                </Routes>
+            </Router>
+        </CursorProvider>
     );
 }
 

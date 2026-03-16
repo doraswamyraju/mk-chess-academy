@@ -16,7 +16,7 @@ const AdminCourses = () => {
 
     const fetchCourses = async () => {
         const token = localStorage.getItem('adminToken');
-        if (!token) { navigate('/admin/login'); return; }
+        if (!token) { navigate('/login'); return; }
 
         try {
             setLoading(true);
@@ -24,7 +24,7 @@ const AdminCourses = () => {
             if (data.status === 'success') {
                 setCourses(data.courses || []);
             } else if (data.status === 'unauthorized') {
-                navigate('/admin/login');
+                navigate('/login');
             } else {
                 setError(data.message || 'Failed to fetch courses');
             }

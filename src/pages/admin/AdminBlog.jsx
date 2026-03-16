@@ -16,7 +16,7 @@ const AdminBlog = () => {
 
     const fetchPosts = async () => {
         const token = localStorage.getItem('adminToken');
-        if (!token) { navigate('/admin/login'); return; }
+        if (!token) { navigate('/login'); return; }
 
         try {
             setLoading(true);
@@ -24,7 +24,7 @@ const AdminBlog = () => {
             if (data.status === 'success') {
                 setPosts(data.blogs || []);
             } else if (data.status === 'unauthorized') {
-                navigate('/admin/login');
+                navigate('/login');
             } else {
                 setError(data.message || 'Failed to fetch blog posts');
             }
