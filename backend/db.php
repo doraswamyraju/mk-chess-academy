@@ -22,15 +22,15 @@ if ($_SERVER['SERVER_NAME'] == 'localhost' || $_SERVER['SERVER_NAME'] == '127.0.
 } else {
     // LIVE (cPanel)
     // Update these with the actual details from cPanel MySQL Database Wizard
-    $db_name = "rajugda1_mkchess"; 
-    $username = "rajugda1_mkuser";
-    $password = "BOHPM6139n@"; 
+    $db_name = "skillsak_mkchess";
+    $username = "skillsak_mkuser";
+    $password = "BOHPM6139n@";
 }
 
 try {
     $conn = new PDO("mysql:host=" . $host . ";dbname=" . $db_name, $username, $password);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $exception) {
+} catch (PDOException $exception) {
     echo json_encode(["error" => "Connection error: " . $exception->getMessage()]);
     exit();
 }

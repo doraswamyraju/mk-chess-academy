@@ -1,7 +1,7 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home3/rajugda1/mkchessacademy.com/
+    - export DEPLOYPATH=/home/skillsak/mkchessacademy.com/
     
     # 1. Copy the Frontend Build (Contents of build to root)
     - /bin/cp -R -p build/* $DEPLOYPATH
