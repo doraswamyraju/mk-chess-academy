@@ -8,41 +8,25 @@ const QuoteIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width="24"
 const ChevronLeftIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="15 18 9 12 15 6"></polyline></svg>);
 const ChevronRightIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="9 18 15 12 9 6"></polyline></svg>);
 
-
 // --- PAGE-SPECIFIC DATA ---
 const founders = [
     { name: 'G Hema Chandra Mouli', titles: ['Senior National Arbiter', 'Chess in Schools Trainer', 'National Instructor', 'Arena Grand Master'], rating: 1987, image: 'https://placehold.co/400x400/9ca3af/FFFFFF?text=G.H.C.+Mouli' },
     { name: 'G Karthik Gopal', titles: ['National Instructor', 'Arena Grand Master', 'FIDE Arbiter', 'Chess in Schools Trainer'], rating: 1864, image: 'https://placehold.co/400x400/a1a1aa/FFFFFF?text=G.K.+Gopal' },
 ];
-// ... (rest of the page data remains the same)
-const achievementImages = [
-    'https://placehold.co/800x500/1A237E/FFFFFF?text=State+Championship+Winner',
-    'https://placehold.co/800x500/2962FF/FFFFFF?text=National+Tournament+Participants',
-    'https://placehold.co/800x500/FF3D00/FFFFFF?text=Trophy+Ceremony',
-    'https://placehold.co/800x500/424242/FFFFFF?text=Team+Event+Glory',
-    'https://placehold.co/800x500/1E88E5/FFFFFF?text=Junior+Cup+2024',
-    'https://placehold.co/800x500/D81B60/FFFFFF?text=Online+Blitz+Winner',
-    'https://placehold.co/800x500/004D40/FFFFFF?text=International+Exposure',
-];
+// Removed static achievementImages, testimonials, and faqs arrays
+// as they are now fetched dynamically.
+
 const googleReviews = [
     { name: "Srinivasarao R.", rating: 5, text: "Very good chess academy... My son is improving his game very well... Individual attention to each and every student... Very good coaching by Karthik sir and Mouli sir..." },
     { name: "Lokesh", rating: 5, text: "Best chess academy in Rajahmundry. They will teach from basics to advanced. Both the coaches are very friendly." },
     { name: "MOHAN", rating: 5, text: "Good coaching and good environment to learn chess. My children are very interested to go to the academy." },
     { name: "Prasad G", rating: 5, text: "Excellent coaching for all age groups. Both coaches are FIDE rated players. I strongly recommend this academy." },
 ];
-const testimonials = [
-    { name: "Parent of Annanya Ch", image: "https://placehold.co/150x150/E3F2FD/1A237E?text=Parent", text: "The focused training and tournament preparation at Modern Knight have been instrumental in our daughter's success. The coaches don't just teach moves; they build confidence and strategic thinking. We've seen tremendous growth in her game and her personality since she joined. We couldn't be happier with our decision." },
-];
+
 const courses = [
     { title: "Beginner's Gambit", level: "For new players", features: ["Fundamentals & Rules", "Basic Tactics", "Opening Principles", "Fun-based Learning"] },
     { title: "Intermediate Strategy", level: "For rated players < 1400", features: ["Positional Play", "Advanced Tactics", "Middlegame Planning", "Endgame Techniques"] },
     { title: "Advanced Mastery", level: "For rated players > 1400", features: ["In-depth Opening Theory", "Complex Calculations", "Tournament Psychology", "Personalized Coaching"] },
-];
-// Blog posts are now fetched dynamically
-const faqs = [
-    { q: "What is the minimum age to join?", a: "We welcome students from the age of 5. Our curriculum is tailored to different age groups and skill levels, ensuring a suitable learning environment for everyone." },
-    { q: "Do I need any prior chess experience?", a: "Not at all! We have batches for absolute beginners as well as for advanced players. We will assess your level and place you in the appropriate group." },
-    { q: "What are the timings for the classes?", a: "We offer flexible timings, including weekday evenings and weekend batches, for both online and offline classes. Please contact us for the detailed schedule." },
 ];
 
 
@@ -224,42 +208,58 @@ const CoursesSection = () => (
     </Section>
 );
 
-const GallerySection = ({ announcement }) => (
-    <Section bgColor="var(--white)" divider="slant" dividerColor="var(--light-bg)">
-        <div className="text-center mb-16"><h2 className="text-4xl font-bold text-[var(--dark-blue)]">Glimpses of Glory</h2><p className="text-[var(--text-light)] mt-4 max-w-3xl mx-auto text-lg">A snapshot of our students' proudest moments and victories.</p></div>
-        
-        {announcement && (
-             <div className="max-w-4xl mx-auto mb-12">
-                <InteractiveArea className="w-full">
-                    <a href={announcement.link || "#"} target={announcement.link ? "_blank" : "_self"} rel="noreferrer" className="block w-full bg-gradient-to-r from-[var(--dark-blue)] to-[var(--primary-blue)] rounded-xl shadow-2xl p-8 relative overflow-hidden group transform transition duration-500 hover:scale-[1.02]">
-                        <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-white opacity-10 group-hover:scale-150 transition-transform duration-700 ease-in-out"></div>
-                        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
-                            <div>
-                                <h3 className="text-sm font-bold tracking-wider text-[var(--accent-red)] uppercase mb-2">📢 Latest Announcement</h3>
-                                <p className="text-white text-xl md:text-2xl font-semibold leading-relaxed">{announcement.message}</p>
-                            </div>
-                            {announcement.link && (
-                                <button className="flex-shrink-0 bg-[var(--accent-red)] text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:shadow-xl hover:bg-opacity-90 transition-all">
-                                    Learn More
-                                </button>
-                            )}
-                        </div>
-                    </a>
-                </InteractiveArea>
-            </div>
-        )}
+const GallerySection = ({ announcement, images }) => {
+    // Determine the array of images to loop over
+    const displayImages = images.length > 0 ? images : [];
 
-        <div className="relative w-full overflow-hidden mask-image-lr">
-            <div className="flex scrolling-wrapper">
-                {[...achievementImages, ...achievementImages].map((src, index) => (
-                    <div key={index} className="flex-shrink-0 w-[300px] md:w-[400px] mx-4">
-                        <img src={src} className="w-full h-full object-cover rounded-lg shadow-xl" alt={`Achievement ${index + 1}`} />
+    return (
+        <Section bgColor="var(--white)" divider="slant" dividerColor="var(--light-bg)">
+            <div className="text-center mb-16"><h2 className="text-4xl font-bold text-[var(--dark-blue)]">Glimpses of Glory</h2><p className="text-[var(--text-light)] mt-4 max-w-3xl mx-auto text-lg">A snapshot of our students' proudest moments and victories.</p></div>
+            
+            {announcement && (
+                <div className="max-w-4xl mx-auto mb-12">
+                    <InteractiveArea className="w-full">
+                        <a href={announcement.link || "#"} target={announcement.link ? "_blank" : "_self"} rel="noreferrer" className="block w-full bg-gradient-to-r from-[var(--dark-blue)] to-[var(--primary-blue)] rounded-xl shadow-2xl p-8 relative overflow-hidden group transform transition duration-500 hover:scale-[1.02]">
+                            <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-white opacity-10 group-hover:scale-150 transition-transform duration-700 ease-in-out"></div>
+                            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+                                <div>
+                                    <h3 className="text-sm font-bold tracking-wider text-[var(--accent-red)] uppercase mb-2">📢 Latest Announcement</h3>
+                                    <p className="text-white text-xl md:text-2xl font-semibold leading-relaxed">{announcement.message}</p>
+                                </div>
+                                {announcement.link && (
+                                    <button className="flex-shrink-0 bg-[var(--accent-red)] text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:shadow-xl hover:bg-opacity-90 transition-all">
+                                        Learn More
+                                    </button>
+                                )}
+                            </div>
+                        </a>
+                    </InteractiveArea>
+                </div>
+            )}
+
+            {displayImages.length > 0 ? (
+                <div className="relative w-full overflow-hidden mask-image-lr">
+                    <div className="flex scrolling-wrapper">
+                        {/* Duplicate the array to create an infinite scrolling effect */}
+                        {[...displayImages, ...displayImages].map((img, index) => (
+                            <div key={`${img.id}-${index}`} className="flex-shrink-0 w-[300px] md:w-[400px] mx-4 relative group">
+                                <img src={img.image_url} className="w-full h-64 object-cover rounded-lg shadow-xl" alt={img.title} />
+                                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-all duration-300 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                    <div className="text-center p-4">
+                                        <h4 className="text-white font-bold text-xl">{img.title}</h4>
+                                        {img.description && <p className="text-gray-200 mt-2 text-sm">{img.description}</p>}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                ))}
-            </div>
-        </div>
-    </Section>
-);
+                </div>
+            ) : (
+                <div className="text-center text-gray-500 py-8">No gallery images available yet.</div>
+            )}
+        </Section>
+    );
+};
 
 const StarRating = ({ rating }) => (<div className="flex justify-center mb-4">{[...Array(5)].map((_, i) => <StarIcon key={i} className={`w-6 h-6 ${i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}/>)}</div>);
 
@@ -283,20 +283,45 @@ const GoogleReviews = () => (
     </Section>
 );
 
-const TestimonialsSection = () => (
+const TestimonialsSection = ({ testimonials }) => (
     <Section bgColor="var(--white)" divider="slant" dividerColor="var(--light-bg)">
         <div className="text-center mb-16"><h2 className="text-4xl font-bold text-[var(--dark-blue)]">A Champion's Journey</h2></div>
-        {testimonials.map(item => (
-            <InteractiveArea key={item.name} onHoverType="queen" className="w-full">
-                <div className="max-w-4xl mx-auto bg-[var(--dark-blue)] text-white rounded-lg shadow-2xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-8 md:gap-12">
-                    <img src={item.image} alt={item.name} className="w-40 h-40 rounded-full flex-shrink-0 ring-4 ring-[var(--accent-red)] p-1"/>
-                    <div>
-                        <p className="text-xl italic text-gray-300 leading-relaxed">"{item.text}"</p>
-                        <p className="text-right mt-4 font-bold text-lg text-white">- {item.name}</p>
-                    </div>
-                </div>
-            </InteractiveArea>
-        ))}
+        
+        {testimonials.length === 0 ? (
+            <div className="text-center text-gray-500 py-8">More champions coming soon...</div>
+        ) : (
+            <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                {testimonials.map(item => (
+                    <InteractiveArea key={item.id} onHoverType="queen" className="w-full">
+                        <div className="bg-[var(--dark-blue)] text-white rounded-lg shadow-2xl p-8 flex flex-col h-full transform transition duration-300 hover:scale-[1.02]">
+                            <div className="flex items-center gap-6 mb-6">
+                                {item.avatar_url ? (
+                                    <img src={item.avatar_url} alt={item.student_name} className="w-20 h-20 rounded-full flex-shrink-0 ring-4 ring-[var(--accent-red)] p-1 object-cover"/>
+                                ) : (
+                                    <div className="w-20 h-20 rounded-full flex-shrink-0 ring-4 ring-[var(--accent-red)] p-1 bg-white text-[var(--dark-blue)] flex items-center justify-center font-bold text-2xl">
+                                        {item.student_name.charAt(0)}
+                                    </div>
+                                )}
+                                <div>
+                                    <h4 className="font-bold text-xl text-white">{item.student_name}</h4>
+                                    <span className="text-sm text-gray-300">{item.course_taken}</span>
+                                    <div className="mt-2 text-yellow-400 text-sm">
+                                        {'★'.repeat(item.rating)}{'☆'.repeat(5 - item.rating)}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex-grow">
+                                <p className="text-lg italic text-gray-300 leading-relaxed relative">
+                                    <span className="text-4xl text-[var(--accent-red)] absolute -left-4 -top-4 opacity-50">"</span>
+                                    {item.review_text}
+                                    <span className="text-4xl text-[var(--accent-red)] absolute -bottom-8 opacity-50">"</span>
+                                </p>
+                            </div>
+                        </div>
+                    </InteractiveArea>
+                ))}
+            </div>
+        )}
     </Section>
 );
 
@@ -381,7 +406,7 @@ const BlogSection = ({ blogs }) => {
     );
 };
 
-const FAQ = () => {
+const FAQ = ({ faqs }) => {
     const [openIndex, setOpenIndex] = useState(null);
     const toggleFAQ = index => { setOpenIndex(openIndex === index ? null : index); };
     return (
@@ -389,21 +414,25 @@ const FAQ = () => {
             <div className="container mx-auto px-6 max-w-3xl">
                 <div className="text-center mb-12"><h2 className="text-4xl font-bold text-[var(--dark-blue)]">Frequently Asked Questions</h2></div>
                 <div className="space-y-4">
-                    {faqs.map((faq, index) => (
-                        <InteractiveArea key={index} className="w-full">
-                            <div className="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md">
-                                <button onClick={() => toggleFAQ(index)} className="w-full flex justify-between items-center p-5 text-left font-semibold text-lg text-[var(--dark-blue)]">
-                                    <span>{faq.q}</span>
-                                    <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center text-[var(--primary-blue)]">
-                                        <span className={`transform transition-transform duration-300 ${openIndex === index ? 'rotate-45' : ''}`}>+</span>
+                    {faqs.length === 0 ? (
+                        <div className="text-center text-gray-500">More updates coming soon!</div>
+                    ) : (
+                        faqs.map((faq, index) => (
+                            <InteractiveArea key={faq.id} className="w-full">
+                                <div className="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md">
+                                    <button onClick={() => toggleFAQ(index)} className="w-full flex justify-between items-center p-5 text-left font-semibold text-lg text-[var(--dark-blue)]">
+                                        <span>{faq.question}</span>
+                                        <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center text-[var(--primary-blue)]">
+                                            <span className={`transform transition-transform duration-300 ${openIndex === index ? 'rotate-45' : ''}`}>+</span>
+                                        </div>
+                                    </button>
+                                    <div className={`transition-all duration-500 ease-in-out ${openIndex === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+                                        <p className="px-5 pb-5 text-[var(--text-light)] whitespace-pre-wrap">{faq.answer}</p>
                                     </div>
-                                </button>
-                                <div className={`transition-all duration-500 ease-in-out ${openIndex === index ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
-                                    <p className="px-5 pb-5 text-[var(--text-light)]">{faq.a}</p>
                                 </div>
-                            </div>
-                        </InteractiveArea>
-                    ))}
+                            </InteractiveArea>
+                        ))
+                    )}
                 </div>
             </div>
         </Section>
@@ -413,7 +442,13 @@ const FAQ = () => {
 
 // --- MAIN HOMEPAGE COMPONENT ---
 const HomePage = () => {
-    const [publicData, setPublicData] = useState({ announcement: null, blogs: [] });
+    const [publicData, setPublicData] = useState({ 
+        announcement: null, 
+        blogs: [],
+        faqs: [],
+        gallery: [],
+        testimonials: []
+    });
 
     useEffect(() => {
         const fetchPublicData = async () => {
@@ -423,7 +458,10 @@ const HomePage = () => {
                 if (data.status === 'success') {
                     setPublicData({
                         announcement: data.announcement,
-                        blogs: data.blogs || []
+                        blogs: data.blogs || [],
+                        faqs: data.faqs || [],
+                        gallery: data.gallery || [],
+                        testimonials: data.testimonials || []
                     });
                 }
             } catch (err) {
@@ -446,12 +484,12 @@ const HomePage = () => {
             <HeroSection />
             <InstituteSnapshot />
             <CoursesSection />
-            <GallerySection announcement={publicData.announcement} />
+            <GallerySection announcement={publicData.announcement} images={publicData.gallery} />
             <GoogleReviews />
-            <TestimonialsSection />
+            <TestimonialsSection testimonials={publicData.testimonials} />
             <ContactSection />
             <BlogSection blogs={publicData.blogs} />
-            <FAQ />
+            <FAQ faqs={publicData.faqs} />
         </main>
     );
 };

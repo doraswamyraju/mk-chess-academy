@@ -10,13 +10,56 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $rawData = file_get_contents("php://input");
 $data = json_decode($rawData, true);
 
+// If data is null, it might be a multipart/form-data request
+if (!$data && !empty($_POST)) {
+    $data = $_POST;
+    // For file uploads the JSON structure we used was nested (e.g. data['blog']['title']).
+    // To support the new FormData flat structure, we map it into a 'blog' object if it's a blog action.
+    if (isset($data['action']) && in_array($data['action'], ['add_blog', 'update_blog'])) {
+        $data['blog'] = [
+            'id' => $data['id'] ?? null,
+            'title' => $data['title'] ?? '',
+            'category' => $data['category'] ?? '',
+            'excerpt' => $data['excerpt'] ?? '',
+            'is_published' => $data['is_published'] ?? 0,
+            'image_url' => $data['existing_image'] ?? ''
+        ];
+    }
+}
+
 if (!$data) {
     http_response_code(400);
-    echo json_encode(["status" => "error", "message" => "Invalid JSON payload"]);
+    echo json_encode(["status" => "error", "message" => "Invalid payload"]);
     exit();
 }
 
 $action = isset($data['action']) ? $data['action'] : '';
+
+// --- HELPER FOR UPLOADS ---
+function handleImageUpload($fileFieldName) {
+    if (isset($_FILES[$fileFieldName]) && $_FILES[$fileFieldName]['error'] === UPLOAD_ERR_OK) {
+        $uploadDir = __DIR__ . '/uploads/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+        
+        $fileName = time() . '_' . basename($_FILES[$fileFieldName]['name']);
+        // Sanitize file name
+        $fileName = preg_replace('/[^a-zA-Z0-9.\-_]/', '', $fileName);
+        $targetFilePath = $uploadDir . $fileName;
+        
+        $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
+        $allowTypes = array('jpg', 'png', 'jpeg', 'gif', 'webp', 'svg');
+        
+        if (in_array($fileType, $allowTypes)) {
+            if (move_uploaded_file($_FILES[$fileFieldName]['tmp_name'], $targetFilePath)) {
+                // Return relative URL from the backend folder
+                return '/backend/uploads/' . $fileName;
+            }
+        }
+    }
+    return null;
+}
 
 // 1. Authentication Check Helper
 function verifyToken($data, $conn) {
@@ -170,20 +213,26 @@ switch ($action) {
     case 'add_blog':
         verifyToken($data, $conn);
         $b = $data['blog'];
+        $uploadedPath = handleImageUpload('image');
+        $imageUrl = $uploadedPath ? $uploadedPath : $b['image_url'];
+
         try {
             $stmt = $conn->prepare("INSERT INTO blog_posts (title, category, excerpt, image_url, is_published) VALUES (:t, :c, :e, :i, :p)");
-            $stmt->execute([':t' => $b['title'], ':c' => $b['category'], ':e' => $b['excerpt'], ':i' => $b['image_url'], ':p' => $b['is_published']]);
-            echo json_encode(["status" => "success"]);
+            $stmt->execute([':t' => $b['title'], ':c' => $b['category'], ':e' => $b['excerpt'], ':i' => $imageUrl, ':p' => $b['is_published']]);
+            echo json_encode(["status" => "success", "image_url" => $imageUrl]);
         } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
         break;
 
     case 'update_blog':
         verifyToken($data, $conn);
         $b = $data['blog'];
+        $uploadedPath = handleImageUpload('image');
+        $imageUrl = $uploadedPath ? $uploadedPath : $b['image_url'];
+
         try {
             $stmt = $conn->prepare("UPDATE blog_posts SET title=:t, category=:c, excerpt=:e, image_url=:i, is_published=:p WHERE id=:id");
-            $stmt->execute([':t' => $b['title'], ':c' => $b['category'], ':e' => $b['excerpt'], ':i' => $b['image_url'], ':p' => $b['is_published'], ':id' => $b['id']]);
-            echo json_encode(["status" => "success"]);
+            $stmt->execute([':t' => $b['title'], ':c' => $b['category'], ':e' => $b['excerpt'], ':i' => $imageUrl, ':p' => $b['is_published'], ':id' => $b['id']]);
+            echo json_encode(["status" => "success", "image_url" => $imageUrl]);
         } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
         break;
 
@@ -228,6 +277,122 @@ switch ($action) {
         verifyToken($data, $conn);
         try {
             $stmt = $conn->prepare("DELETE FROM announcements WHERE id = :id");
+            $stmt->execute([':id' => $data['id']]);
+            echo json_encode(["status" => "success"]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
+        break;
+
+    // --- FAQS MANAGEMENT ---
+    case 'get_faqs':
+        try { // Public
+            $stmt = $conn->query("SELECT * FROM faqs ORDER BY display_order ASC, created_at DESC");
+            echo json_encode(["status" => "success", "faqs" => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
+        break;
+
+    case 'add_faq':
+        verifyToken($data, $conn);
+        $f = $data['faq'];
+        try {
+            $stmt = $conn->prepare("INSERT INTO faqs (question, answer, display_order, is_active) VALUES (:q, :a, :d, :v)");
+            $stmt->execute([':q' => $f['question'], ':a' => $f['answer'], ':d' => $f['display_order'], ':v' => $f['is_active']]);
+            echo json_encode(["status" => "success"]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
+        break;
+
+    case 'update_faq':
+        verifyToken($data, $conn);
+        $f = $data['faq'];
+        try {
+            $stmt = $conn->prepare("UPDATE faqs SET question=:q, answer=:a, display_order=:d, is_active=:v WHERE id=:id");
+            $stmt->execute([':q' => $f['question'], ':a' => $f['answer'], ':d' => $f['display_order'], ':v' => $f['is_active'], ':id' => $f['id']]);
+            echo json_encode(["status" => "success"]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
+        break;
+
+    case 'delete_faq':
+        verifyToken($data, $conn);
+        try {
+            $stmt = $conn->prepare("DELETE FROM faqs WHERE id = :id");
+            $stmt->execute([':id' => $data['id']]);
+            echo json_encode(["status" => "success"]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
+        break;
+
+    // --- GALLERY MANAGEMENT ---
+    case 'get_gallery':
+        try { // Public
+            $stmt = $conn->query("SELECT * FROM gallery ORDER BY created_at DESC");
+            echo json_encode(["status" => "success", "gallery" => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
+        break;
+
+    case 'add_gallery':
+        verifyToken($data, $conn);
+        $uploadedPath = handleImageUpload('image');
+        // fallback to existing_image isn't strictly needed for add, but keeps logic uniform if reusing code
+        $imageUrl = $uploadedPath ? $uploadedPath : ($data['existing_image'] ?? '');
+        try {
+            $stmt = $conn->prepare("INSERT INTO gallery (title, description, image_url, is_active) VALUES (:t, :d, :i, :v)");
+            $stmt->execute([':t' => $data['title'], ':d' => $data['description'], ':i' => $imageUrl, ':v' => $data['is_active']]);
+            echo json_encode(["status" => "success", "image_url" => $imageUrl]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
+        break;
+
+    case 'update_gallery':
+        verifyToken($data, $conn);
+        $uploadedPath = handleImageUpload('image');
+        $imageUrl = $uploadedPath ? $uploadedPath : ($data['existing_image'] ?? '');
+        try {
+            $stmt = $conn->prepare("UPDATE gallery SET title=:t, description=:d, image_url=:i, is_active=:v WHERE id=:id");
+            $stmt->execute([':t' => $data['title'], ':d' => $data['description'], ':i' => $imageUrl, ':v' => $data['is_active'], ':id' => $data['id']]);
+            echo json_encode(["status" => "success", "image_url" => $imageUrl]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
+        break;
+
+    case 'delete_gallery':
+        verifyToken($data, $conn);
+        try {
+            $stmt = $conn->prepare("DELETE FROM gallery WHERE id = :id");
+            $stmt->execute([':id' => $data['id']]);
+            echo json_encode(["status" => "success"]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
+        break;
+
+    // --- TESTIMONIALS MANAGEMENT ---
+    case 'get_testimonials':
+        try { // Public
+            $stmt = $conn->query("SELECT * FROM testimonials ORDER BY created_at DESC");
+            echo json_encode(["status" => "success", "testimonials" => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
+        break;
+
+    case 'add_testimonial':
+        verifyToken($data, $conn);
+        $uploadedPath = handleImageUpload('image');
+        $avatarUrl = $uploadedPath ? $uploadedPath : ($data['existing_image'] ?? '');
+        try {
+            $stmt = $conn->prepare("INSERT INTO testimonials (student_name, course_taken, review_text, avatar_url, rating, is_active) VALUES (:n, :c, :r, :a, :rt, :v)");
+            $stmt->execute([':n' => $data['student_name'], ':c' => $data['course_taken'], ':r' => $data['review_text'], ':a' => $avatarUrl, ':rt' => $data['rating'], ':v' => $data['is_active']]);
+            echo json_encode(["status" => "success"]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
+        break;
+
+    case 'update_testimonial':
+        verifyToken($data, $conn);
+        $uploadedPath = handleImageUpload('image');
+        $avatarUrl = $uploadedPath ? $uploadedPath : ($data['existing_image'] ?? '');
+        try {
+            $stmt = $conn->prepare("UPDATE testimonials SET student_name=:n, course_taken=:c, review_text=:r, avatar_url=:a, rating=:rt, is_active=:v WHERE id=:id");
+            $stmt->execute([':n' => $data['student_name'], ':c' => $data['course_taken'], ':r' => $data['review_text'], ':a' => $avatarUrl, ':rt' => $data['rating'], ':v' => $data['is_active'], ':id' => $data['id']]);
+            echo json_encode(["status" => "success"]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
+        break;
+
+    case 'delete_testimonial':
+        verifyToken($data, $conn);
+        try {
+            $stmt = $conn->prepare("DELETE FROM testimonials WHERE id = :id");
             $stmt->execute([':id' => $data['id']]);
             echo json_encode(["status" => "success"]);
         } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }

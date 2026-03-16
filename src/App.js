@@ -27,6 +27,9 @@ import AdminLeads from './pages/admin/AdminLeads';
 import AdminEnrolments from './pages/admin/AdminEnrolments';
 import AdminCourses from './pages/admin/AdminCourses';
 import AdminBlog from './pages/admin/AdminBlog';
+import AdminFAQ from './pages/admin/AdminFAQ';
+import AdminGallery from './pages/admin/AdminGallery';
+import AdminTestimonials from './pages/admin/AdminTestimonials';
 import AdminAnnouncements from './pages/admin/AdminAnnouncements';
 
 // --- THEME & STYLES ---
@@ -139,6 +142,9 @@ function App() {
                         <Route path="courses" element={<AdminCourses />} />
                         <Route path="blog" element={<AdminBlog />} />
                         <Route path="announcements" element={<AdminAnnouncements />} />
+                        <Route path="faq" element={<AdminFAQ />} />
+                        <Route path="gallery" element={<AdminGallery />} />
+                        <Route path="testimonials" element={<AdminTestimonials />} />
                     </Route>
                     
                     {/* Public Single Blog Post Route */}

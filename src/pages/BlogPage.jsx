@@ -12,11 +12,7 @@ const PlayCircleIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width
 
 
 // --- PAGE-SPECIFIC DATA ---
-const blogPosts = [
-    { image: 'https://placehold.co/600x400/FF3D00/FFFFFF?text=Strategy', category: 'Strategy', title: 'The Power of the Pawn', excerpt: 'Discover why the humble pawn is one of the most powerful pieces on the board and how to leverage its strength.' },
-    { image: 'https://placehold.co/600x400/2962FF/FFFFFF?text=History', category: 'History', title: 'The Immortal Game: A Look Back', excerpt: 'Revisit one of the most famous chess games ever played, a masterpiece of romantic-era attacking chess.' },
-    { image: 'https://placehold.co/600x400/1A237E/FFFFFF?text=News', category: 'Academy News', title: 'Our Student Wins State U-12 Title!', excerpt: 'We are proud to announce that our student has secured the first place in the recent state-level championship.' },
-];
+// Dynamic blogs will be fetched from api_public.php
 const resources = [
     { title: "Beginner's Checklist", type: "PDF" },
     { title: "Intermediate Syllabus", type: "PDF" },
@@ -80,26 +76,41 @@ const BlogHero = () => (
     </section>
 );
 
-const FeaturedArticles = ({ posts }) => (
-    <Section divider="slant" dividerColor="var(--light-bg)">
-        <h2 className="text-4xl font-bold text-center text-[var(--dark-blue)] mb-12">Featured Articles & News</h2>
-        <div className="grid lg:grid-cols-3 gap-8">
-            {posts.map((post, index) => (
-                <InteractiveArea key={index} className="w-full">
-                    <div className="bg-white rounded-lg shadow-lg overflow-hidden h-full flex flex-col transform hover:-translate-y-2 transition-transform duration-300">
-                        <img src={post.image} alt={post.title} className="w-full h-48 object-cover"/>
-                        <div className="p-6 flex flex-col flex-grow">
-                            <p className="text-sm font-semibold text-[var(--accent-red)] mb-2">{post.category}</p>
-                            <h3 className="text-xl font-bold text-[var(--dark-blue)] mb-3 flex-grow">{post.title}</h3>
-                            <p className="text-[var(--text-light)] mb-4">{post.excerpt}</p>
-                            <a href="#" className="font-bold text-[var(--primary-blue)] hover:underline mt-auto">Read More &rarr;</a>
-                        </div>
-                    </div>
-                </InteractiveArea>
-            ))}
-        </div>
-    </Section>
-);
+import { useNavigate } from 'react-router-dom';
+
+const FeaturedArticles = ({ posts }) => {
+    const navigate = useNavigate();
+    return (
+        <Section divider="slant" dividerColor="var(--light-bg)">
+            <h2 className="text-4xl font-bold text-center text-[var(--dark-blue)] mb-12">Featured Articles & News</h2>
+            <div className="grid lg:grid-cols-3 gap-8">
+                {posts.length === 0 ? (
+                    <div className="col-span-3 text-center text-gray-500 py-8">No articles published yet. Check back soon!</div>
+                ) : (
+                    posts.map((post) => (
+                        <InteractiveArea key={post.id} className="w-full">
+                            <div className="bg-white rounded-lg shadow-lg overflow-hidden h-full flex flex-col transform hover:-translate-y-2 transition-transform duration-300">
+                                {post.image_url ? (
+                                    <img src={post.image_url} alt={post.title} className="w-full h-48 object-cover bg-gray-200" />
+                                ) : (
+                                    <div className="w-full h-48 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center border-b">
+                                        <span className="text-gray-400 font-medium tracking-widest uppercase">No Image</span>
+                                    </div>
+                                )}
+                                <div className="p-6 flex flex-col flex-grow">
+                                    <p className="text-sm font-semibold text-[var(--accent-red)] mb-2">{post.category}</p>
+                                    <h3 className="text-xl font-bold text-[var(--dark-blue)] mb-3 flex-grow">{post.title}</h3>
+                                    <p className="text-[var(--text-light)] mb-4">{post.excerpt}</p>
+                                    <button onClick={() => navigate(`/blog/${post.id}`)} className="text-left font-bold text-[var(--primary-blue)] hover:underline mt-auto">Read More &rarr;</button>
+                                </div>
+                            </div>
+                        </InteractiveArea>
+                    ))
+                )}
+            </div>
+        </Section>
+    );
+};
 
 const LearningResources = ({ resources }) => (
     <Section bgColor="var(--light-bg)" divider="waves" dividerColor="var(--white)">
@@ -371,10 +382,27 @@ const FinalCTA = () => (
 
 // --- MAIN BLOG PAGE COMPONENT ---
 const BlogPage = () => {
+    const [blogs, setBlogs] = useState([]);
+
+    useEffect(() => {
+        const fetchBlogs = async () => {
+            try {
+                const { postToApi } = await import('../utils/api.js');
+                const data = await postToApi('api_public.php', { action: 'get_public_content' });
+                if (data.status === 'success') {
+                    setBlogs(data.blogs || []);
+                }
+            } catch (err) {
+                console.error("Failed to fetch public content", err);
+            }
+        };
+        fetchBlogs();
+    }, []);
+
     return (
         <main>
             <BlogHero />
-            <FeaturedArticles posts={blogPosts} />
+            <FeaturedArticles posts={blogs} />
             <LearningResources resources={resources} />
             <VideoLibrary videos={videos} />
             <PuzzleSection />
