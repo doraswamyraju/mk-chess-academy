@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import InteractiveArea from '../components/InteractiveArea';
 
 // --- PAGE-SPECIFIC ICONS ---
@@ -37,11 +38,7 @@ const courses = [
     { title: "Intermediate Strategy", level: "For rated players < 1400", features: ["Positional Play", "Advanced Tactics", "Middlegame Planning", "Endgame Techniques"] },
     { title: "Advanced Mastery", level: "For rated players > 1400", features: ["In-depth Opening Theory", "Complex Calculations", "Tournament Psychology", "Personalized Coaching"] },
 ];
-const blogPosts = [
-    { image: 'https://placehold.co/600x400/FF3D00/FFFFFF?text=Strategy', category: 'Strategy', title: 'The Power of the Pawn', excerpt: 'Discover why the humble pawn is one of the most powerful pieces on the board and how to leverage its strength.' },
-    { image: 'https://placehold.co/600x400/2962FF/FFFFFF?text=History', category: 'History', title: 'The Immortal Game: A Look Back', excerpt: 'Revisit one of the most famous chess games ever played, a masterpiece of romantic-era attacking chess.' },
-    { image: 'https://placehold.co/600x400/1A237E/FFFFFF?text=News', category: 'Academy News', title: 'Our Student Wins State U-12 Title!', excerpt: 'We are proud to announce that our student has secured the first place in the recent state-level championship.' },
-];
+// Blog posts are now fetched dynamically
 const faqs = [
     { q: "What is the minimum age to join?", a: "We welcome students from the age of 5. Our curriculum is tailored to different age groups and skill levels, ensuring a suitable learning environment for everyone." },
     { q: "Do I need any prior chess experience?", a: "Not at all! We have batches for absolute beginners as well as for advanced players. We will assess your level and place you in the appropriate group." },
@@ -227,9 +224,31 @@ const CoursesSection = () => (
     </Section>
 );
 
-const GallerySection = () => (
+const GallerySection = ({ announcement }) => (
     <Section bgColor="var(--white)" divider="slant" dividerColor="var(--light-bg)">
         <div className="text-center mb-16"><h2 className="text-4xl font-bold text-[var(--dark-blue)]">Glimpses of Glory</h2><p className="text-[var(--text-light)] mt-4 max-w-3xl mx-auto text-lg">A snapshot of our students' proudest moments and victories.</p></div>
+        
+        {announcement && (
+             <div className="max-w-4xl mx-auto mb-12">
+                <InteractiveArea className="w-full">
+                    <a href={announcement.link || "#"} target={announcement.link ? "_blank" : "_self"} rel="noreferrer" className="block w-full bg-gradient-to-r from-[var(--dark-blue)] to-[var(--primary-blue)] rounded-xl shadow-2xl p-8 relative overflow-hidden group transform transition duration-500 hover:scale-[1.02]">
+                        <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-white opacity-10 group-hover:scale-150 transition-transform duration-700 ease-in-out"></div>
+                        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+                            <div>
+                                <h3 className="text-sm font-bold tracking-wider text-[var(--accent-red)] uppercase mb-2">📢 Latest Announcement</h3>
+                                <p className="text-white text-xl md:text-2xl font-semibold leading-relaxed">{announcement.message}</p>
+                            </div>
+                            {announcement.link && (
+                                <button className="flex-shrink-0 bg-[var(--accent-red)] text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:shadow-xl hover:bg-opacity-90 transition-all">
+                                    Learn More
+                                </button>
+                            )}
+                        </div>
+                    </a>
+                </InteractiveArea>
+            </div>
+        )}
+
         <div className="relative w-full overflow-hidden mask-image-lr">
             <div className="flex scrolling-wrapper">
                 {[...achievementImages, ...achievementImages].map((src, index) => (
@@ -328,26 +347,39 @@ const ContactSection = () => (
     </Section>
 );
 
-const BlogSection = () => (
+const BlogSection = ({ blogs }) => {
+    const navigate = useNavigate();
+    return (
     <Section bgColor="var(--white)" divider="slant" dividerColor="var(--light-bg)">
         <div className="text-center mb-16"><h2 className="text-4xl font-bold text-[var(--dark-blue)]">From Our Blog</h2><p className="text-[var(--text-light)] mt-4 max-w-3xl mx-auto text-lg">Insights, strategies, and news from the world of chess.</p></div>
         <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
-            {blogPosts.map(post => (
-                <InteractiveArea key={post.title} className="w-full h-full">
-                    <div className="bg-gray-50 rounded-lg shadow-lg overflow-hidden h-full flex flex-col transform hover:-translate-y-2 transition-transform duration-300">
-                        <img src={post.image} alt={post.title} className="w-full h-48 object-cover" />
-                        <div className="p-6 flex flex-col flex-grow">
-                            <p className="text-sm font-semibold text-[var(--accent-red)] mb-2">{post.category}</p>
-                            <h3 className="text-xl font-bold text-[var(--dark-blue)] mb-3 flex-grow">{post.title}</h3>
-                            <p className="text-[var(--text-light)] mb-4">{post.excerpt}</p>
-                            <a href="#" className="font-bold text-[var(--primary-blue)] hover:underline mt-auto">Read More &rarr;</a>
+            {blogs.length === 0 ? (
+                <div className="col-span-3 text-center text-gray-500 py-8">No articles published yet. Check back soon!</div>
+            ) : (
+                blogs.map(post => (
+                    <InteractiveArea key={post.id} className="w-full h-full">
+                        <div className="bg-gray-50 rounded-lg shadow-lg overflow-hidden h-full flex flex-col transform hover:-translate-y-2 transition-transform duration-300">
+                            {post.image_url ? (
+                                <img src={post.image_url} alt={post.title} className="w-full h-48 object-cover bg-gray-200" />
+                            ) : (
+                                <div className="w-full h-48 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center border-b">
+                                    <span className="text-gray-400 font-medium tracking-widest uppercase">No Image</span>
+                                </div>
+                            )}
+                            <div className="p-6 flex flex-col flex-grow">
+                                <p className="text-sm font-semibold text-[var(--accent-red)] mb-2">{post.category}</p>
+                                <h3 className="text-xl font-bold text-[var(--dark-blue)] mb-3 flex-grow">{post.title}</h3>
+                                <p className="text-[var(--text-light)] mb-4">{post.excerpt}</p>
+                                <button onClick={() => navigate(`/blog/${post.id}`)} className="text-left font-bold text-[var(--primary-blue)] hover:underline mt-auto">Read More &rarr;</button>
+                            </div>
                         </div>
-                    </div>
-                </InteractiveArea>
-            ))}
+                    </InteractiveArea>
+                ))
+            )}
         </div>
     </Section>
-);
+    );
+};
 
 const FAQ = () => {
     const [openIndex, setOpenIndex] = useState(null);
@@ -381,16 +413,44 @@ const FAQ = () => {
 
 // --- MAIN HOMEPAGE COMPONENT ---
 const HomePage = () => {
+    const [publicData, setPublicData] = useState({ announcement: null, blogs: [] });
+
+    useEffect(() => {
+        const fetchPublicData = async () => {
+            try {
+                const { postToApi } = await import('../utils/api.js');
+                const data = await postToApi('api_public.php', { action: 'get_public_content' });
+                if (data.status === 'success') {
+                    setPublicData({
+                        announcement: data.announcement,
+                        blogs: data.blogs || []
+                    });
+                }
+            } catch (err) {
+                console.error("Failed to fetch public content", err);
+            }
+        };
+        fetchPublicData();
+    }, []);
+
     return (
         <main>
+            {publicData.announcement && (
+                <div className="w-full bg-[var(--accent-red)] text-white overflow-hidden py-3 shadow-md relative z-40">
+                    <div className="whitespace-nowrap animate-pulse flex items-center">
+                        <span className="mx-4 font-bold tracking-wide uppercase">🚨 Latest Announcement:</span>
+                        <a href={publicData.announcement.link || "#"} className="hover:underline">{publicData.announcement.message}</a>
+                    </div>
+                </div>
+            )}
             <HeroSection />
             <InstituteSnapshot />
             <CoursesSection />
-            <GallerySection />
+            <GallerySection announcement={publicData.announcement} />
             <GoogleReviews />
             <TestimonialsSection />
             <ContactSection />
-            <BlogSection />
+            <BlogSection blogs={publicData.blogs} />
             <FAQ />
         </main>
     );

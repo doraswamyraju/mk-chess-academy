@@ -15,6 +15,7 @@ import ContactUsPage from './pages/ContactUsPage';
 import CoursesPage from './pages/CoursesPage';
 import OnlineCoursePage from './pages/OnlineCoursePage';
 import TestimonialsPage from './pages/TestimonialsPage';
+import SingleBlogPostPage from './pages/SingleBlogPostPage';
 
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
@@ -140,6 +141,9 @@ function App() {
                         <Route path="announcements" element={<AdminAnnouncements />} />
                     </Route>
                     
+                    {/* Public Single Blog Post Route */}
+                    <Route path="/blog/:id" element={<SingleBlogPostPage />} />
+
                     {/* Public Site Catch-all (retains old state-based behavior) */}
                     <Route path="/*" element={<PublicApp />} />
                 </Routes>
