@@ -16,7 +16,7 @@ const AdminLogin = () => {
         setIsLoading(true);
 
         try {
-            const data = await postToApi('api_admin_auth.php', {
+            const data = await postToApi('api_admin_dashboard.php', {
                 action: 'login',
                 username,
                 password
