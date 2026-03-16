@@ -41,7 +41,7 @@ const Header = ({ setPage }) => {
 
   return (
     <>
-      <header className="bg-white backdrop-blur-sm bg-opacity-80 text-[var(--dark-blue)] p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
+      <header className="bg-white backdrop-blur-sm bg-opacity-80 text-[var(--dark-blue)] p-4 flex justify-between md:justify-center items-center md:gap-8 lg:gap-16 sticky top-0 z-50 shadow-md">
         {/* Logo */}
         <div className="flex items-center space-x-3">
           <InteractiveArea onHoverType="queen">
