@@ -84,16 +84,65 @@ const RegistrationForms = () => {
                     <button onClick={() => setActiveTab('international')} className={`py-2 px-6 font-semibold transition-colors duration-300 ${activeTab === 'international' ? 'border-b-2 border-[var(--accent-red)] text-[var(--accent-red)]' : 'text-gray-500 hover:text-[var(--accent-red)]'}`}>For Foreign Students</button>
                 </div>
                 {activeTab === 'indian' ? (
-                    <form className="space-y-4">
-                        <InteractiveArea className="w-full"><input type="text" placeholder="Student's Name" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow" /></InteractiveArea>
-                        <InteractiveArea className="w-full"><input type="email" placeholder="Parent's Email" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow" /></InteractiveArea>
+                    <form onSubmit={async (e) => {
+                        e.preventDefault();
+                        const submitBtn = e.target.querySelector('button[type="submit"]');
+                        const originalText = submitBtn.innerText;
+                        try {
+                            submitBtn.innerText = 'Sending...';
+                            submitBtn.disabled = true;
+                            
+                            const data = {
+                                action: 'submit_enrolment',
+                                student_name: e.target.student_name.value,
+                                parent_email: e.target.parent_email.value,
+                                student_type: 'indian'
+                            };
+                            const { postToApi } = await import('../utils/api.js');
+                            await postToApi('api_client_forms.php', data);
+                            alert('Application submitted successfully! We will contact you soon.');
+                            e.target.reset();
+                        } catch (err) {
+                            alert('Error submitting application: ' + err.message);
+                        } finally {
+                            submitBtn.innerText = originalText;
+                            submitBtn.disabled = false;
+                        }
+                    }} className="space-y-4">
+                        <InteractiveArea className="w-full"><input type="text" name="student_name" required placeholder="Student's Name" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow" /></InteractiveArea>
+                        <InteractiveArea className="w-full"><input type="email" name="parent_email" required placeholder="Parent's Email" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow" /></InteractiveArea>
                         <InteractiveArea><button type="submit" className="w-full bg-[var(--accent-red)] text-white font-bold py-3 px-6 rounded-md hover:bg-opacity-90 transition-colors">Submit Application</button></InteractiveArea>
                     </form>
                 ) : (
-                    <form className="space-y-4">
-                        <InteractiveArea className="w-full"><input type="text" placeholder="Student's Name" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow" /></InteractiveArea>
-                        <InteractiveArea className="w-full"><input type="email" placeholder="Parent's Email" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow" /></InteractiveArea>
-                        <InteractiveArea className="w-full"><input type="text" placeholder="Country & Time Zone" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow" /></InteractiveArea>
+                    <form onSubmit={async (e) => {
+                        e.preventDefault();
+                        const submitBtn = e.target.querySelector('button[type="submit"]');
+                        const originalText = submitBtn.innerText;
+                        try {
+                            submitBtn.innerText = 'Sending...';
+                            submitBtn.disabled = true;
+                            
+                            const data = {
+                                action: 'submit_enrolment',
+                                student_name: e.target.student_name.value,
+                                parent_email: e.target.parent_email.value,
+                                country_timezone: e.target.country_timezone.value,
+                                student_type: 'international'
+                            };
+                            const { postToApi } = await import('../utils/api.js');
+                            await postToApi('api_client_forms.php', data);
+                            alert('International Application submitted successfully!');
+                            e.target.reset();
+                        } catch (err) {
+                            alert('Error submitting application: ' + err.message);
+                        } finally {
+                            submitBtn.innerText = originalText;
+                            submitBtn.disabled = false;
+                        }
+                    }} className="space-y-4">
+                        <InteractiveArea className="w-full"><input type="text" name="student_name" required placeholder="Student's Name" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow" /></InteractiveArea>
+                        <InteractiveArea className="w-full"><input type="email" name="parent_email" required placeholder="Parent's Email" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow" /></InteractiveArea>
+                        <InteractiveArea className="w-full"><input type="text" name="country_timezone" required placeholder="Country & Time Zone" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow" /></InteractiveArea>
                         <InteractiveArea><button type="submit" className="w-full bg-[var(--accent-red)] text-white font-bold py-3 px-6 rounded-md hover:bg-opacity-90 transition-colors">Submit International Application</button></InteractiveArea>
                     </form>
                 )}

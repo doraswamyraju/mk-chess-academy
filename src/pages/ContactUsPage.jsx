@@ -75,20 +75,50 @@ const MapAndForm = () => (
             <div>
                 <h2 className="text-4xl font-bold text-[var(--dark-blue)] mb-4">Send Us a Message</h2>
                 <p className="text-[var(--text-light)] mb-6">Have a question? Fill out the form below, and we'll get back to you as soon as possible.</p>
-                <form className="bg-white p-8 rounded-lg shadow-xl space-y-4">
-                    <InteractiveArea className="w-full"><input type="text" placeholder="Your Name" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow" /></InteractiveArea>
-                    <InteractiveArea className="w-full"><input type="email" placeholder="Your Email" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow" /></InteractiveArea>
+                <form onSubmit={async (e) => {
+                    e.preventDefault();
+                    const submitBtn = e.target.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerText;
+                    try {
+                        submitBtn.innerText = 'Sending...';
+                        submitBtn.disabled = true;
+                        
+                        const name = e.target.name.value;
+                        const email = e.target.email.value;
+                        const inquiryType = e.target.inquiryType.value;
+                        const messageText = e.target.message.value;
+                        const fullMessage = `Type: ${inquiryType}\n\n${messageText}`;
+
+                        const data = {
+                            action: 'submit_lead',
+                            name: name,
+                            email: email,
+                            message: fullMessage
+                        };
+                        const { postToApi } = await import('../utils/api.js');
+                        await postToApi('api_client_forms.php', data);
+                        alert('Thank you! Your message has been sent.');
+                        e.target.reset();
+                    } catch (err) {
+                        alert('Error sending message: ' + err.message);
+                    } finally {
+                        submitBtn.innerText = originalText;
+                        submitBtn.disabled = false;
+                    }
+                }} className="bg-white p-8 rounded-lg shadow-xl space-y-4">
+                    <InteractiveArea className="w-full"><input type="text" name="name" required placeholder="Your Name" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow" /></InteractiveArea>
+                    <InteractiveArea className="w-full"><input type="email" name="email" required placeholder="Your Email" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow" /></InteractiveArea>
                     <InteractiveArea className="w-full">
-                        <select className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow bg-white">
+                        <select name="inquiryType" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow bg-white">
                             <option>General Inquiry</option>
                             <option>Admissions</option>
                             <option>Online Courses</option>
                             <option>Technical Support</option>
                         </select>
                     </InteractiveArea>
-                    <InteractiveArea className="w-full"><textarea placeholder="Your Message" rows="5" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow"></textarea></InteractiveArea>
+                    <InteractiveArea className="w-full"><textarea name="message" required placeholder="Your Message" rows="5" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow"></textarea></InteractiveArea>
                     <div className="flex items-center">
-                        <input id="consent" type="checkbox" className="h-4 w-4 text-[var(--primary-blue)] focus:ring-[var(--primary-blue)] border-gray-300 rounded" />
+                        <input id="consent" type="checkbox" required className="h-4 w-4 text-[var(--primary-blue)] focus:ring-[var(--primary-blue)] border-gray-300 rounded" />
                         <label htmlFor="consent" className="ml-2 block text-sm text-[var(--text-light)]">I agree to the Privacy Policy.</label>
                     </div>
                     <InteractiveArea><button type="submit" className="w-full bg-[var(--accent-red)] text-white font-bold py-3 px-6 rounded-md hover:bg-opacity-90 transition-colors">Send Message</button></InteractiveArea>

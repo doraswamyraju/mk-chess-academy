@@ -126,19 +126,42 @@ const HeroSection = () => {
                 {/* Contact Form */}
                 <div className="w-full max-w-md mx-auto md:mx-0">
                     <InteractiveArea className="w-full">
-                        <form className="bg-white/10 backdrop-blur-md p-6 sm:p-8 rounded-lg shadow-2xl space-y-4 border border-white/20">
+                        <form onSubmit={async (e) => {
+                            e.preventDefault();
+                            const submitBtn = e.target.querySelector('button[type="submit"]');
+                            const originalText = submitBtn.innerText;
+                            try {
+                                submitBtn.innerText = 'Sending...';
+                                submitBtn.disabled = true;
+                                const data = {
+                                    action: 'submit_lead',
+                                    name: e.target.name.value,
+                                    email: e.target.email.value,
+                                    message: e.target.message.value
+                                };
+                                const { postToApi } = await import('../utils/api.js');
+                                await postToApi('api_client_forms.php', data);
+                                alert('Thank you! Your inquiry has been sent.');
+                                e.target.reset();
+                            } catch (err) {
+                                alert('Error sending inquiry: ' + err.message);
+                            } finally {
+                                submitBtn.innerText = originalText;
+                                submitBtn.disabled = false;
+                            }
+                        }} className="bg-white/10 backdrop-blur-md p-6 sm:p-8 rounded-lg shadow-2xl space-y-4 border border-white/20">
                             <h3 className="text-2xl font-bold text-white text-center mb-4">Request a Free Demo</h3>
                             <div>
                                 <label htmlFor="name" className="sr-only">Name</label>
-                                <input type="text" id="name" placeholder="Your Name" className="w-full p-3 rounded-md border-0 bg-white/20 text-white placeholder-gray-300 focus:ring-2 focus:ring-[var(--accent-red)] outline-none" />
+                                <input type="text" id="name" name="name" required placeholder="Your Name" className="w-full p-3 rounded-md border-0 bg-white/20 text-white placeholder-gray-300 focus:ring-2 focus:ring-[var(--accent-red)] outline-none" />
                             </div>
                             <div>
                                 <label htmlFor="email" className="sr-only">Email</label>
-                                <input type="email" id="email" placeholder="Your Email" className="w-full p-3 rounded-md border-0 bg-white/20 text-white placeholder-gray-300 focus:ring-2 focus:ring-[var(--accent-red)] outline-none" />
+                                <input type="email" id="email" name="email" required placeholder="Your Email" className="w-full p-3 rounded-md border-0 bg-white/20 text-white placeholder-gray-300 focus:ring-2 focus:ring-[var(--accent-red)] outline-none" />
                             </div>
                             <div>
                                 <label htmlFor="message" className="sr-only">Message</label>
-                                <textarea id="message" placeholder="Your Message (Optional)" rows="3" className="w-full p-3 rounded-md border-0 bg-white/20 text-white placeholder-gray-300 focus:ring-2 focus:ring-[var(--accent-red)] outline-none"></textarea>
+                                <textarea id="message" name="message" placeholder="Your Message (Optional)" rows="3" className="w-full p-3 rounded-md border-0 bg-white/20 text-white placeholder-gray-300 focus:ring-2 focus:ring-[var(--accent-red)] outline-none"></textarea>
                             </div>
                             <button type="submit" className="w-full bg-[var(--accent-red)] text-white font-bold py-3 px-6 rounded-md hover:bg-opacity-90 transition-transform hover:scale-105">Send Inquiry</button>
                         </form>
@@ -271,10 +294,34 @@ const ContactSection = () => (
                     <p><strong>Email:</strong> karthikgopal04@gmail.com</p>
                 </div>
             </div>
-            <form className="space-y-4">
-                <InteractiveArea className="w-full"><input type="text" placeholder="Your Name" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none" /></InteractiveArea>
-                <InteractiveArea className="w-full"><input type="email" placeholder="Your Email" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none" /></InteractiveArea>
-                <InteractiveArea className="w-full"><textarea placeholder="Your Message" rows="5" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none"></textarea></InteractiveArea>
+            <form onSubmit={async (e) => {
+                e.preventDefault();
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerText;
+                try {
+                    submitBtn.innerText = 'Sending...';
+                    submitBtn.disabled = true;
+                    
+                    const data = {
+                        action: 'submit_lead',
+                        name: e.target.name.value,
+                        email: e.target.email.value,
+                        message: e.target.message.value
+                    };
+                    const { postToApi } = await import('../utils/api.js');
+                    await postToApi('api_client_forms.php', data);
+                    alert('Thank you! Your message has been sent.');
+                    e.target.reset();
+                } catch (err) {
+                    alert('Error sending message: ' + err.message);
+                } finally {
+                    submitBtn.innerText = originalText;
+                    submitBtn.disabled = false;
+                }
+            }} className="space-y-4">
+                <InteractiveArea className="w-full"><input type="text" name="name" required placeholder="Your Name" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none" /></InteractiveArea>
+                <InteractiveArea className="w-full"><input type="email" name="email" required placeholder="Your Email" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none" /></InteractiveArea>
+                <InteractiveArea className="w-full"><textarea name="message" required placeholder="Your Message" rows="5" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none"></textarea></InteractiveArea>
                 <InteractiveArea><button type="submit" className="w-full bg-[var(--accent-red)] text-white font-bold py-3 px-6 rounded-md hover:bg-opacity-90 transition-colors">Send Message</button></InteractiveArea>
             </form>
         </div>

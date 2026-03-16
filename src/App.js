@@ -16,6 +16,18 @@ import CoursesPage from './pages/CoursesPage';
 import OnlineCoursePage from './pages/OnlineCoursePage';
 import TestimonialsPage from './pages/TestimonialsPage';
 
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+
+// Import Admin pages
+import AdminLayout from './pages/admin/AdminLayout';
+import AdminLogin from './pages/admin/AdminLogin';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminLeads from './pages/admin/AdminLeads';
+import AdminEnrolments from './pages/admin/AdminEnrolments';
+import AdminCourses from './pages/admin/AdminCourses';
+import AdminBlog from './pages/admin/AdminBlog';
+import AdminAnnouncements from './pages/admin/AdminAnnouncements';
+
 // --- THEME & STYLES ---
 const StyleInjector = () => (
     <style>{`
@@ -51,8 +63,8 @@ const StyleInjector = () => (
     `}</style>
 );
 
-
-function App() {
+// Wrapper for the public site to maintain the old state-based routing behavior underneath
+const PublicApp = () => {
     const [page, setPage] = useState('Home'); 
 
     useEffect(() => {
@@ -102,6 +114,37 @@ function App() {
                 {renderPage()}
             </Layout>
         </CursorProvider>
+    );
+};
+
+// Protect admin routes
+const ProtectedRoute = ({ children }) => {
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+        return <Navigate to="/admin/login" replace />;
+    }
+    return children;
+};
+
+function App() {
+    return (
+        <Router>
+            <Routes>
+                {/* Admin Routes */}
+                <Route path="/admin/login" element={<><StyleInjector /><AdminLogin /></>} />
+                <Route path="/admin" element={<ProtectedRoute><StyleInjector /><AdminLayout /></ProtectedRoute>}>
+                    <Route index element={<AdminDashboard />} />
+                    <Route path="leads" element={<AdminLeads />} />
+                    <Route path="enrolments" element={<AdminEnrolments />} />
+                    <Route path="courses" element={<AdminCourses />} />
+                    <Route path="blog" element={<AdminBlog />} />
+                    <Route path="announcements" element={<AdminAnnouncements />} />
+                </Route>
+                
+                {/* Public Site Catch-all (retains old state-based behavior) */}
+                <Route path="/*" element={<PublicApp />} />
+            </Routes>
+        </Router>
     );
 }
 
