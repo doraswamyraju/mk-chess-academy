@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { postToApi } from '../../utils/api';
+import { postToApi, postFormDataToApi } from '../../utils/api';
 import { useNavigate } from 'react-router-dom';
 
 const AdminAnnouncements = () => {
@@ -7,6 +7,7 @@ const AdminAnnouncements = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
+    const [images, setImages] = useState([]); // State for multiple files
     const [currentAnn, setCurrentAnn] = useState({ id: null, title: '', message: '', is_active: 1 });
     const navigate = useNavigate();
 
@@ -40,10 +41,26 @@ const AdminAnnouncements = () => {
         const token = localStorage.getItem('adminToken');
         try {
             const action = currentAnn.id ? 'update_announcement' : 'add_announcement';
-            const data = await postToApi('api_admin_dashboard.php', { action, token, announcement: currentAnn });
+            
+            const formData = new FormData();
+            formData.append('action', action);
+            formData.append('token', token);
+            if (currentAnn.id) formData.append('id', currentAnn.id);
+            formData.append('title', currentAnn.title || '');
+            formData.append('message', currentAnn.message || '');
+            formData.append('is_active', currentAnn.is_active === 1 ? 1 : 0);
+
+            // Append multiple files for Gallery Sync
+            for (let i = 0; i < images.length; i++) {
+                formData.append('images[]', images[i]);
+            }
+
+            const data = await postFormDataToApi('api_admin_dashboard.php', formData);
+            
             if (data.status === 'success') {
                 setIsEditing(false);
                 setCurrentAnn({ id: null, title: '', message: '', is_active: 1 });
+                setImages([]);
                 fetchAnnouncements();
             } else {
                 alert(data.message);
@@ -84,7 +101,7 @@ const AdminAnnouncements = () => {
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold text-gray-900">Manage Banner Announcements</h2>
                 {!isEditing && (
-                    <button onClick={() => { setIsEditing(true); setCurrentAnn({ id: null, title: '', message: '', is_active: 1 }); }} className="bg-[var(--accent-red)] hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                    <button onClick={() => { setIsEditing(true); setCurrentAnn({ id: null, title: '', message: '', is_active: 1 }); setImages([]); }} className="bg-[var(--accent-red)] hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
                         Add New Announcement
                     </button>
                 )}
@@ -103,6 +120,11 @@ const AdminAnnouncements = () => {
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Display Message (Public text)</label>
                             <textarea required value={currentAnn.message} onChange={(e) => setCurrentAnn({...currentAnn, message: e.target.value})} rows="2" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm p-2 border" placeholder="e.g. Admissions now open for summer batch!"></textarea>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Attach Pictures (Syncs automatically to Glimpses of Glory Gallery)</label>
+                            <input type="file" multiple accept="image/*" onChange={(e) => setImages(e.target.files)} className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100" />
+                            {images.length > 0 && <p className="text-sm text-green-600 mt-2">{images.length} file(s) selected.</p>}
                         </div>
                         <div className="flex items-center">
                             <input type="checkbox" checked={currentAnn.is_active} onChange={(e) => setCurrentAnn({...currentAnn, is_active: e.target.checked ? 1 : 0})} id="is_active" className="h-4 w-4 text-[var(--accent-red)] border-gray-300 rounded" />

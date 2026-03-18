@@ -15,15 +15,24 @@ if (!$data && !empty($_POST)) {
     $data = $_POST;
     // For file uploads the JSON structure we used was nested (e.g. data['blog']['title']).
     // To support the new FormData flat structure, we map it into a 'blog' object if it's a blog action.
-    if (isset($data['action']) && in_array($data['action'], ['add_blog', 'update_blog'])) {
-        $data['blog'] = [
-            'id' => $data['id'] ?? null,
-            'title' => $data['title'] ?? '',
-            'category' => $data['category'] ?? '',
-            'excerpt' => $data['excerpt'] ?? '',
-            'is_published' => $data['is_published'] ?? 0,
-            'image_url' => $data['existing_image'] ?? ''
-        ];
+    if (isset($data['action'])) {
+        if (in_array($data['action'], ['add_blog', 'update_blog'])) {
+            $data['blog'] = [
+                'id' => $data['id'] ?? null,
+                'title' => $data['title'] ?? '',
+                'category' => $data['category'] ?? '',
+                'excerpt' => $data['excerpt'] ?? '',
+                'is_published' => $data['is_published'] ?? 0,
+                'image_url' => $data['existing_image'] ?? ''
+            ];
+        } else if (in_array($data['action'], ['add_announcement', 'update_announcement'])) {
+            $data['announcement'] = [
+                'id' => $data['id'] ?? null,
+                'title' => $data['title'] ?? '',
+                'message' => $data['message'] ?? '',
+                'is_active' => $data['is_active'] ?? 0
+            ];
+        }
     }
 }
 
@@ -345,6 +354,35 @@ switch ($action) {
         try {
             $stmt = $conn->prepare("INSERT INTO announcements (title, message, is_active) VALUES (:t, :m, :a)");
             $stmt->execute([':t' => $a['title'], ':m' => $a['message'], ':a' => $a['is_active']]);
+            
+            // Handle multiple images to sync with gallery
+            if (isset($_FILES['images']) && is_array($_FILES['images']['name'])) {
+                $total = count($_FILES['images']['name']);
+                for ($i = 0; $i < $total; $i++) {
+                    if ($_FILES['images']['error'][$i] === UPLOAD_ERR_OK) {
+                        $uploadDir = __DIR__ . '/uploads/';
+                        if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+                        $fileName = time() . '_' . $i . '_' . preg_replace('/[^a-zA-Z0-9.\-_]/', '', basename($_FILES['images']['name'][$i]));
+                        $targetFilePath = $uploadDir . $fileName;
+                        
+                        $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
+                        $allowTypes = array('jpg', 'png', 'jpeg', 'gif', 'webp', 'svg');
+                        
+                        if (in_array($fileType, $allowTypes)) {
+                            if (move_uploaded_file($_FILES['images']['tmp_name'][$i], $targetFilePath)) {
+                                $imageUrl = '/backend/uploads/' . $fileName;
+                                $gstmt = $conn->prepare("INSERT INTO gallery (title, description, image_url, is_active) VALUES (:t, :d, :i, 1)");
+                                $gstmt->execute([
+                                    ':t' => "Announcement: " . $a['title'], 
+                                    ':d' => $a['message'], 
+                                    ':i' => $imageUrl
+                                ]);
+                            }
+                        }
+                    }
+                }
+            }
+
             echo json_encode(["status" => "success"]);
         } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
         break;
@@ -355,6 +393,35 @@ switch ($action) {
         try {
             $stmt = $conn->prepare("UPDATE announcements SET title=:t, message=:m, is_active=:a WHERE id=:id");
             $stmt->execute([':t' => $a['title'], ':m' => $a['message'], ':a' => $a['is_active'], ':id' => $a['id']]);
+            
+            // Handle multiple images to sync with gallery
+            if (isset($_FILES['images']) && is_array($_FILES['images']['name'])) {
+                $total = count($_FILES['images']['name']);
+                for ($i = 0; $i < $total; $i++) {
+                    if ($_FILES['images']['error'][$i] === UPLOAD_ERR_OK) {
+                        $uploadDir = __DIR__ . '/uploads/';
+                        if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+                        $fileName = time() . '_' . $i . '_' . preg_replace('/[^a-zA-Z0-9.\-_]/', '', basename($_FILES['images']['name'][$i]));
+                        $targetFilePath = $uploadDir . $fileName;
+                        
+                        $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
+                        $allowTypes = array('jpg', 'png', 'jpeg', 'gif', 'webp', 'svg');
+                        
+                        if (in_array($fileType, $allowTypes)) {
+                            if (move_uploaded_file($_FILES['images']['tmp_name'][$i], $targetFilePath)) {
+                                $imageUrl = '/backend/uploads/' . $fileName;
+                                $gstmt = $conn->prepare("INSERT INTO gallery (title, description, image_url, is_active) VALUES (:t, :d, :i, 1)");
+                                $gstmt->execute([
+                                    ':t' => "Announcement: " . $a['title'], 
+                                    ':d' => $a['message'], 
+                                    ':i' => $imageUrl
+                                ]);
+                            }
+                        }
+                    }
+                }
+            }
+
             echo json_encode(["status" => "success"]);
         } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
         break;
