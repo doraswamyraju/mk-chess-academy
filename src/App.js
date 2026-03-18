@@ -22,6 +22,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 // Import Admin pages
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminLogin from './pages/admin/AdminLogin';
+import AdminResetPassword from './pages/admin/AdminResetPassword';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminLeads from './pages/admin/AdminLeads';
 import AdminEnrolments from './pages/admin/AdminEnrolments';
@@ -135,6 +136,7 @@ function App() {
                 <Routes>
                     {/* Admin Routes */}
                     <Route path="/login" element={<AdminLogin />} />
+                    <Route path="/admin/reset-password" element={<AdminResetPassword />} />
                     <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
                         <Route index element={<AdminDashboard />} />
                         <Route path="leads" element={<AdminLeads />} />

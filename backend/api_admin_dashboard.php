@@ -81,23 +81,109 @@ function verifyToken($data, $conn) {
 switch ($action) {
     // --- AUTHENTICATION ---
     case 'login':
-        $username = isset($data['username']) ? trim($data['username']) : '';
+        $email = isset($data['email']) ? trim($data['email']) : '';
         $password = isset($data['password']) ? trim($data['password']) : '';
 
         try {
-            $stmt = $conn->prepare("SELECT * FROM admin_users WHERE username = :username LIMIT 1");
-            $stmt->bindParam(':username', $username);
+            $stmt = $conn->prepare("SELECT * FROM admin_users WHERE email = :email LIMIT 1");
+            $stmt->bindParam(':email', $email);
             $stmt->execute();
             $admin = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($admin && password_verify($password, $admin['password_hash'])) {
-                // Simple token generation
+                // Set simple token
                 echo json_encode(["status" => "success", "token" => "mkca_admin_token_123"]);
             } else {
-                echo json_encode(["status" => "error", "message" => "Invalid credentials"]);
+                echo json_encode(["status" => "error", "message" => "Invalid email or password"]);
             }
         } catch (PDOException $e) {
-            echo json_encode(["status" => "error", "message" => "Database error"]);
+            echo json_encode(["status" => "error", "message" => "Database error: " . $e->getMessage()]);
+        }
+        break;
+
+    case 'forgot_password':
+        $email = isset($data['email']) ? trim($data['email']) : '';
+        try {
+            // Check if email exists
+            $stmt = $conn->prepare("SELECT id FROM admin_users WHERE email = :email LIMIT 1");
+            $stmt->execute([':email' => $email]);
+            $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($admin) {
+                // Generate secure token
+                $token = bin2hex(random_bytes(32));
+                
+                // Save token to DB with 1 hour expiration
+                $update = $conn->prepare("UPDATE admin_users SET reset_token = :token, reset_expires = DATE_ADD(NOW(), INTERVAL 1 HOUR) WHERE id = :id");
+                $update->execute([':token' => $token, ':id' => $admin['id']]);
+
+                // Send Email via native mail()
+                $resetLink = "https://mkchessacademy.com/admin/reset-password?token=" . $token;
+                
+                $to = $email;
+                $subject = "Password Reset Request - MK Chess Academy";
+                
+                $message = "
+                <html>
+                <head><title>Password Reset</title></head>
+                <body>
+                    <p>Hello Admin,</p>
+                    <p>We received a request to reset your MKCA dashboard password.</p>
+                    <p>Click the link below to set a new password. This link will expire in 1 hour.</p>
+                    <p><a href='$resetLink'>$resetLink</a></p>
+                    <br>
+                    <p>If you did not request a password reset, you can safely ignore this email.</p>
+                </body>
+                </html>
+                ";
+
+                // Standard headers for HTML email
+                $headers = "MIME-Version: 1.0" . "\r\n";
+                $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+                // Optionally define From header based on server config
+                $headers .= "From: no-reply@mkchessacademy.com\r\n";
+
+                // Silence errors if mail system is not configured on local dev env
+                @mail($to, $subject, $message, $headers);
+            }
+            
+            // Always return success to prevent email enumeration
+            echo json_encode(["status" => "success"]);
+            
+        } catch (Exception $e) {
+            echo json_encode(["status" => "error", "message" => "Error processing request."]);
+        }
+        break;
+
+    case 'reset_password':
+        $token = isset($data['token']) ? trim($data['token']) : '';
+        $newPassword = isset($data['password']) ? trim($data['password']) : '';
+
+        if(empty($token) || empty($newPassword)) {
+            echo json_encode(["status" => "error", "message" => "Missing token or password"]);
+            break;
+        }
+
+        try {
+            // Validate token and not expired
+            $stmt = $conn->prepare("SELECT id FROM admin_users WHERE reset_token = :token AND reset_expires > NOW() LIMIT 1");
+            $stmt->execute([':token' => $token]);
+            $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($admin) {
+                // Hash new password
+                $newHash = password_hash($newPassword, PASSWORD_DEFAULT);
+                
+                // Update password and clear tokens
+                $update = $conn->prepare("UPDATE admin_users SET password_hash = :hash, reset_token = NULL, reset_expires = NULL WHERE id = :id");
+                $update->execute([':hash' => $newHash, ':id' => $admin['id']]);
+                
+                echo json_encode(["status" => "success"]);
+            } else {
+                echo json_encode(["status" => "error", "message" => "Invalid or expired reset token"]);
+            }
+        } catch (PDOException $e) {
+            echo json_encode(["status" => "error", "message" => "Database error."]);
         }
         break;
 
