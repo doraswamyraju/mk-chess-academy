@@ -251,6 +251,13 @@ const GallerySection = ({ announcements, images }) => {
 
 const StarRating = ({ rating }) => (<div className="flex justify-center mb-4">{[...Array(5)].map((_, i) => <StarIcon key={i} className={`w-6 h-6 ${i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}/>)}</div>);
 
+const googleReviews = [
+    { name: "Rahul S.", rating: 5, text: "Excellent coaching! My son improved his game drastically within 3 months." },
+    { name: "Priya M.", rating: 5, text: "The coaches are highly professional and patient. The environment is perfect for learning." },
+    { name: "Anita Rao", rating: 5, text: "MK Chess Academy is the best in the region. Their structured curriculum really helps." },
+    { name: "Vikram K.", rating: 5, text: "Great online classes and flexible timings. Highly recommended for aspiring players!" }
+];
+
 const GoogleReviews = () => (
     <Section bgColor="var(--light-bg)" divider="waves" dividerColor="var(--white)">
         <div className="text-center mb-16"><h2 className="text-4xl font-bold text-[var(--dark-blue)]">What Our Students Say</h2><p className="text-[var(--text-light)] mt-4 max-w-3xl mx-auto text-lg">Direct feedback from our students and parents on Google.</p></div>
