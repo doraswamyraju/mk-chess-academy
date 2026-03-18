@@ -10,7 +10,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once 'db.php';
 
-$action = $_GET['action'] ?? ($_POST['action'] ?? null);
+$rawData = file_get_contents("php://input");
+$jsonData = json_decode($rawData, true);
+
+$action = $_GET['action'] ?? ($_POST['action'] ?? ($jsonData['action'] ?? null));
 
 $response = ['status' => 'error', 'message' => 'Invalid action'];
 
