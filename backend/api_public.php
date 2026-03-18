@@ -22,7 +22,7 @@ switch ($action) {
         // Fetch active announcement
         $announcement = null;
         try {
-            $stmt = $pdo->query("SELECT message, link FROM announcements WHERE is_active = 1 LIMIT 1");
+            $stmt = $conn->query("SELECT message, link FROM announcements WHERE is_active = 1 LIMIT 1");
             $announcement = $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             // Ignore if table doesn't exist yet
@@ -31,28 +31,28 @@ switch ($action) {
         // Fetch published blogs
         $blogs = [];
         try {
-            $stmt = $pdo->query("SELECT id, title, category, excerpt, image_url, created_at FROM blog_posts WHERE is_published = 1 ORDER BY created_at DESC LIMIT 6");
+            $stmt = $conn->query("SELECT id, title, category, excerpt, image_url, created_at FROM blog_posts WHERE is_published = 1 ORDER BY created_at DESC LIMIT 6");
             $blogs = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {}
 
         // Fetch FAQs
         $faqs = [];
         try {
-            $stmt = $pdo->query("SELECT id, question, answer FROM faqs WHERE is_active = 1 ORDER BY display_order ASC");
+            $stmt = $conn->query("SELECT id, question, answer FROM faqs WHERE is_active = 1 ORDER BY display_order ASC");
             $faqs = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {}
 
         // Fetch Gallery
         $gallery = [];
         try {
-            $stmt = $pdo->query("SELECT id, title, description, image_url FROM gallery WHERE is_active = 1 ORDER BY created_at DESC LIMIT 12");
+            $stmt = $conn->query("SELECT id, title, description, image_url FROM gallery WHERE is_active = 1 ORDER BY created_at DESC LIMIT 12");
             $gallery = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {}
 
         // Fetch Testimonials
         $testimonials = [];
         try {
-            $stmt = $pdo->query("SELECT id, student_name, course_taken, review_text, avatar_url, rating FROM testimonials WHERE is_active = 1 ORDER BY created_at DESC LIMIT 6");
+            $stmt = $conn->query("SELECT id, student_name, course_taken, review_text, avatar_url, rating FROM testimonials WHERE is_active = 1 ORDER BY created_at DESC LIMIT 6");
             $testimonials = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {}
 
@@ -74,7 +74,7 @@ switch ($action) {
         }
 
         try {
-            $stmt = $pdo->prepare("SELECT id, title, category, content, image_url, created_at FROM blog_posts WHERE id = ? AND is_published = 1");
+            $stmt = $conn->prepare("SELECT id, title, category, content, image_url, created_at FROM blog_posts WHERE id = ? AND is_published = 1");
             $stmt->execute([$id]);
             $post = $stmt->fetch(PDO::FETCH_ASSOC);
 
