@@ -13,7 +13,8 @@ const SingleBlogPostPage = () => {
     useEffect(() => {
         const fetchPost = async () => {
             try {
-                const data = await postToApi('api_public.php', { action: 'get_blog_post', id });
+                const postId = parseInt(id, 10);
+                const data = await postToApi('api_public.php', { action: 'get_blog_post', id: postId });
                 if (data.status === 'success') {
                     setPost(data.post);
                     document.title = `${data.post.title} | MKCA Blog`;

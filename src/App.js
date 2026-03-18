@@ -27,6 +27,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminLeads from './pages/admin/AdminLeads';
 import AdminEnrolments from './pages/admin/AdminEnrolments';
 import AdminCourses from './pages/admin/AdminCourses';
+import AdminCoaches from './pages/admin/AdminCoaches';
 import AdminBlog from './pages/admin/AdminBlog';
 import AdminFAQ from './pages/admin/AdminFAQ';
 import AdminGallery from './pages/admin/AdminGallery';
@@ -142,6 +143,7 @@ function App() {
                         <Route path="leads" element={<AdminLeads />} />
                         <Route path="enrolments" element={<AdminEnrolments />} />
                         <Route path="courses" element={<AdminCourses />} />
+                        <Route path="coaches" element={<AdminCoaches />} />
                         <Route path="blog" element={<AdminBlog />} />
                         <Route path="announcements" element={<AdminAnnouncements />} />
                         <Route path="faq" element={<AdminFAQ />} />

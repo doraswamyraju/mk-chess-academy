@@ -9,25 +9,8 @@ const ChevronLeftIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" widt
 const ChevronRightIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="9 18 15 12 9 6"></polyline></svg>);
 
 // --- PAGE-SPECIFIC DATA ---
-const founders = [
-    { name: 'G Hema Chandra Mouli', titles: ['Senior National Arbiter', 'Chess in Schools Trainer', 'National Instructor', 'Arena Grand Master'], rating: 1987, image: 'https://placehold.co/400x400/9ca3af/FFFFFF?text=G.H.C.+Mouli' },
-    { name: 'G Karthik Gopal', titles: ['National Instructor', 'Arena Grand Master', 'FIDE Arbiter', 'Chess in Schools Trainer'], rating: 1864, image: 'https://placehold.co/400x400/a1a1aa/FFFFFF?text=G.K.+Gopal' },
-];
-// Removed static achievementImages, testimonials, and faqs arrays
+// Removed static achievementImages, testimonials, faqs, courses, and founders arrays
 // as they are now fetched dynamically.
-
-const googleReviews = [
-    { name: "Srinivasarao R.", rating: 5, text: "Very good chess academy... My son is improving his game very well... Individual attention to each and every student... Very good coaching by Karthik sir and Mouli sir..." },
-    { name: "Lokesh", rating: 5, text: "Best chess academy in Rajahmundry. They will teach from basics to advanced. Both the coaches are very friendly." },
-    { name: "MOHAN", rating: 5, text: "Good coaching and good environment to learn chess. My children are very interested to go to the academy." },
-    { name: "Prasad G", rating: 5, text: "Excellent coaching for all age groups. Both coaches are FIDE rated players. I strongly recommend this academy." },
-];
-
-const courses = [
-    { title: "Beginner's Gambit", level: "For new players", features: ["Fundamentals & Rules", "Basic Tactics", "Opening Principles", "Fun-based Learning"] },
-    { title: "Intermediate Strategy", level: "For rated players < 1400", features: ["Positional Play", "Advanced Tactics", "Middlegame Planning", "Endgame Techniques"] },
-    { title: "Advanced Mastery", level: "For rated players > 1400", features: ["In-depth Opening Theory", "Complex Calculations", "Tournament Psychology", "Personalized Coaching"] },
-];
 
 
 // --- REUSABLE HELPER COMPONENTS ---
@@ -170,45 +153,50 @@ const HeroSection = () => {
 };
 
 
-const InstituteSnapshot = () => (
+const InstituteSnapshot = ({ coaches }) => (
     <Section bgColor="var(--white)" divider="slant" dividerColor="var(--light-bg)">
-        <div className="text-center mb-16"><h2 className="text-4xl font-bold text-[var(--dark-blue)]">Meet Our Master Founders</h2><p className="text-[var(--text-light)] mt-4 max-w-3xl mx-auto text-lg">Led by a team of certified and decorated chess professionals dedicated to elevating your game.</p></div>
+        <div className="text-center mb-16"><h2 className="text-4xl font-bold text-[var(--dark-blue)]">Meet Our Master Instructors</h2><p className="text-[var(--text-light)] mt-4 max-w-3xl mx-auto text-lg">Led by a team of certified and decorated chess professionals dedicated to elevating your game.</p></div>
         <div className="flex flex-wrap -mx-4 justify-center items-stretch gap-y-8">
-            {founders.map(founder => (
-                 <div key={founder.name} className="w-full md:w-1/2 px-4">
+            {coaches && coaches.length > 0 ? coaches.map(coach => (
+                 <div key={coach.id} className="w-full md:w-1/2 px-4">
                     <InteractiveArea onHoverType="queen" className="w-full h-full">
                         <div className="bg-gray-50 rounded-lg shadow-lg p-8 text-center h-full border-b-4 border-[var(--primary-blue)] flex flex-col transition-all duration-300 hover:shadow-2xl hover:-translate-y-2">
-                            <img src={founder.image} alt={founder.name} className="w-32 h-32 rounded-full mx-auto mb-4 ring-4 ring-[var(--primary-blue)] p-1" />
-                            <h3 className="text-2xl font-bold text-[var(--dark-blue)] font-sans">{founder.name}</h3>
-                            <p className="font-bold text-lg text-[var(--primary-blue)]">Int'l Rating: {founder.rating}</p>
-                            <div className="flex flex-wrap justify-center gap-2 mt-4">{founder.titles.map(title => (<span key={title} className="bg-blue-100 text-[var(--primary-blue)] text-xs font-semibold px-3 py-1 rounded-full">{title}</span>))}</div>
+                            {coach.image_url ? (
+                                <img src={coach.image_url} alt={coach.name} className="w-32 h-32 rounded-full mx-auto mb-4 ring-4 ring-[var(--primary-blue)] p-1 object-cover" />
+                            ) : (
+                                <div className="w-32 h-32 rounded-full mx-auto mb-4 ring-4 ring-[var(--primary-blue)] p-1 bg-gray-200 flex items-center justify-center text-gray-400 font-bold">{coach.name.charAt(0)}</div>
+                            )}
+                            <h3 className="text-2xl font-bold text-[var(--dark-blue)] font-sans">{coach.name}</h3>
+                            <p className="font-bold text-lg text-[var(--primary-blue)]">{coach.role}</p>
+                            <p className="text-sm text-gray-600 mt-2 mb-4 line-clamp-3">{coach.bio}</p>
+                            <div className="flex flex-wrap justify-center gap-2 mt-auto">{(coach.achievements || '').split(',').map((feat, i) => feat.trim() && (<span key={i} className="bg-blue-100 text-[var(--primary-blue)] text-xs font-semibold px-3 py-1 rounded-full">{feat.trim()}</span>))}</div>
                         </div>
                     </InteractiveArea>
                 </div>
-            ))}
+            )) : <p className="text-gray-500">Instructor profiles coming soon.</p>}
         </div>
     </Section>
 );
 
-const CoursesSection = () => (
+const CoursesSection = ({ courses }) => (
     <Section bgColor="var(--light-bg)" divider="waves" dividerColor="var(--white)">
         <div className="text-center mb-16"><h2 className="text-4xl font-bold text-[var(--dark-blue)]">Our Courses</h2><p className="text-[var(--text-light)] mt-4 max-w-3xl mx-auto text-lg">Structured programs designed to take your skills to the next level, from beginner to advanced.</p></div>
         <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
-            {courses.map(course => (
-                <InteractiveArea key={course.title} className="w-full h-full">
+            {courses && courses.length > 0 ? courses.map(course => (
+                <InteractiveArea key={course.id} className="w-full h-full">
                     <div className="bg-white rounded-lg shadow-lg p-8 h-full flex flex-col transform hover:-translate-y-2 transition-transform duration-300 border-b-4 border-[var(--accent-red)]">
                         <h3 className="text-2xl font-bold text-center text-[var(--dark-blue)]">{course.title}</h3>
                         <p className="text-center text-[var(--text-light)] mb-6">{course.level}</p>
-                        <ul className="space-y-3 text-[var(--text-dark)] flex-grow">{course.features.map(feature => <li key={feature} className="flex items-center"><StarIcon className="w-5 h-5 mr-3 text-[var(--accent-red)]"/><span>{feature}</span></li>)}</ul>
-                        <button className="mt-8 bg-[var(--primary-blue)] text-white font-bold py-2 px-6 rounded-md w-full hover:bg-opacity-90 transition-colors">Learn More</button>
+                        <ul className="space-y-3 text-[var(--text-dark)] flex-grow">{(course.features || '').split(',').map((feat, i) => feat.trim() && <li key={i} className="flex items-center"><StarIcon className="w-5 h-5 mr-3 text-red-500 flex-shrink-0"/><span>{feat.trim()}</span></li>)}</ul>
+                        <button className="mt-8 bg-[var(--primary-blue)] text-white font-bold py-2 px-6 rounded-md w-full hover:bg-opacity-90 transition-colors">Enroll Now</button>
                     </div>
                 </InteractiveArea>
-            ))}
+            )) : <p className="col-span-full text-center text-gray-500">Check back soon for upcoming courses!</p>}
         </div>
     </Section>
 );
 
-const GallerySection = ({ announcement, images }) => {
+const GallerySection = ({ announcements, images }) => {
     // Determine the array of images to loop over
     const displayImages = images.length > 0 ? images : [];
 
@@ -216,17 +204,17 @@ const GallerySection = ({ announcement, images }) => {
         <Section bgColor="var(--white)" divider="slant" dividerColor="var(--light-bg)">
             <div className="text-center mb-16"><h2 className="text-4xl font-bold text-[var(--dark-blue)]">Glimpses of Glory</h2><p className="text-[var(--text-light)] mt-4 max-w-3xl mx-auto text-lg">A snapshot of our students' proudest moments and victories.</p></div>
             
-            {announcement && (
+            {announcements && announcements.length > 0 && (
                 <div className="max-w-4xl mx-auto mb-12">
                     <InteractiveArea className="w-full">
-                        <a href={announcement.link || "#"} target={announcement.link ? "_blank" : "_self"} rel="noreferrer" className="block w-full bg-gradient-to-r from-[var(--dark-blue)] to-[var(--primary-blue)] rounded-xl shadow-2xl p-8 relative overflow-hidden group transform transition duration-500 hover:scale-[1.02]">
+                        <a href={announcements[0].link || "#"} target={announcements[0].link ? "_blank" : "_self"} rel="noreferrer" className="block w-full bg-gradient-to-r from-[var(--dark-blue)] to-[var(--primary-blue)] rounded-xl shadow-2xl p-8 relative overflow-hidden group transform transition duration-500 hover:scale-[1.02]">
                             <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-white opacity-10 group-hover:scale-150 transition-transform duration-700 ease-in-out"></div>
                             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
                                 <div>
-                                    <h3 className="text-sm font-bold tracking-wider text-[var(--accent-red)] uppercase mb-2">📢 Latest Announcement</h3>
-                                    <p className="text-white text-xl md:text-2xl font-semibold leading-relaxed">{announcement.message}</p>
+                                    <h3 className="text-sm font-bold tracking-wider text-[var(--accent-red)] uppercase mb-2">📢 Featured Announcement</h3>
+                                    <p className="text-white text-xl md:text-2xl font-semibold leading-relaxed">{announcements[0].message}</p>
                                 </div>
-                                {announcement.link && (
+                                {announcements[0].link && (
                                     <button className="flex-shrink-0 bg-[var(--accent-red)] text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:shadow-xl hover:bg-opacity-90 transition-all">
                                         Learn More
                                     </button>
@@ -395,7 +383,10 @@ const BlogSection = ({ blogs }) => {
                                 <p className="text-sm font-semibold text-[var(--accent-red)] mb-2">{post.category}</p>
                                 <h3 className="text-xl font-bold text-[var(--dark-blue)] mb-3 flex-grow">{post.title}</h3>
                                 <p className="text-[var(--text-light)] mb-4">{post.excerpt}</p>
-                                <button onClick={() => navigate(`/blog/${post.id}`)} className="text-left font-bold text-[var(--primary-blue)] hover:underline mt-auto">Read More &rarr;</button>
+                                <button onClick={() => {
+                                    const slug = post.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+                                    navigate(`/blog/${post.id}-${slug}`);
+                                }} className="text-left font-bold text-[var(--primary-blue)] hover:underline mt-auto">Read More &rarr;</button>
                             </div>
                         </div>
                     </InteractiveArea>
@@ -443,11 +434,13 @@ const FAQ = ({ faqs }) => {
 // --- MAIN HOMEPAGE COMPONENT ---
 const HomePage = () => {
     const [publicData, setPublicData] = useState({ 
-        announcement: null, 
+        announcements: [], 
         blogs: [],
         faqs: [],
         gallery: [],
-        testimonials: []
+        testimonials: [],
+        courses: [],
+        coaches: []
     });
 
     useEffect(() => {
@@ -457,11 +450,13 @@ const HomePage = () => {
                 const data = await postToApi('api_public.php', { action: 'get_public_content' });
                 if (data.status === 'success') {
                     setPublicData({
-                        announcement: data.announcement,
+                        announcements: data.announcements || [],
                         blogs: data.blogs || [],
                         faqs: data.faqs || [],
                         gallery: data.gallery || [],
-                        testimonials: data.testimonials || []
+                        testimonials: data.testimonials || [],
+                        courses: data.courses || [],
+                        coaches: data.coaches || []
                     });
                 }
             } catch (err) {
@@ -473,18 +468,23 @@ const HomePage = () => {
 
     return (
         <main>
-            {publicData.announcement && (
-                <div className="w-full bg-[var(--accent-red)] text-white overflow-hidden py-3 shadow-md relative z-40">
-                    <div className="whitespace-nowrap animate-pulse flex items-center">
-                        <span className="mx-4 font-bold tracking-wide uppercase">🚨 Latest Announcement:</span>
-                        <a href={publicData.announcement.link || "#"} className="hover:underline">{publicData.announcement.message}</a>
+            {publicData.announcements && publicData.announcements.length > 0 && (
+                <div className="w-full bg-[var(--accent-red)] text-white overflow-hidden py-3 shadow-md relative z-40 flex overflow-x-auto no-scrollbar">
+                    <div className="whitespace-nowrap animate-pulse flex items-center min-w-[max-content] px-4">
+                        {publicData.announcements.map((ann, idx) => (
+                            <span key={idx} className="mr-8 flex items-center">
+                                <span className="font-bold tracking-wide uppercase mr-2 text-yellow-300">📢 Update:</span>
+                                <a href={ann.link || "#"} className="hover:underline text-white font-medium">{ann.message}</a>
+                                {idx < publicData.announcements.length - 1 && <span className="mx-8 text-black opacity-30">|</span>}
+                            </span>
+                        ))}
                     </div>
                 </div>
             )}
             <HeroSection />
-            <InstituteSnapshot />
-            <CoursesSection />
-            <GallerySection announcement={publicData.announcement} images={publicData.gallery} />
+            <InstituteSnapshot coaches={publicData.coaches} />
+            <CoursesSection courses={publicData.courses} />
+            <GallerySection announcements={publicData.announcements} images={publicData.gallery} />
             <GoogleReviews />
             <TestimonialsSection testimonials={publicData.testimonials} />
             <ContactSection />

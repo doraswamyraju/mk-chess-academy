@@ -19,11 +19,11 @@ $response = ['status' => 'error', 'message' => 'Invalid action'];
 
 switch ($action) {
     case 'get_public_content':
-        // Fetch active announcement
-        $announcement = null;
+        // Fetch active announcements
+        $announcements = [];
         try {
-            $stmt = $conn->query("SELECT message, link FROM announcements WHERE is_active = 1 LIMIT 1");
-            $announcement = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt = $conn->query("SELECT id, title, message, link FROM announcements WHERE is_active = 1 ORDER BY created_at DESC");
+            $announcements = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             // Ignore if table doesn't exist yet
         }
@@ -56,13 +56,29 @@ switch ($action) {
             $testimonials = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {}
 
+        // Fetch Courses
+        $courses = [];
+        try {
+            $stmt = $conn->query("SELECT id, title, level, features FROM courses WHERE is_active = 1 ORDER BY id ASC");
+            $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {}
+
+        // Fetch Coaches
+        $coaches = [];
+        try {
+            $stmt = $conn->query("SELECT id, name, role, bio, achievements, image_url FROM coaches WHERE is_active = 1 ORDER BY created_at ASC");
+            $coaches = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {}
+
         $response = [
             'status' => 'success',
-            'announcement' => $announcement,
+            'announcements' => $announcements,
             'blogs' => $blogs,
             'faqs' => $faqs,
             'gallery' => $gallery,
-            'testimonials' => $testimonials
+            'testimonials' => $testimonials,
+            'courses' => $courses,
+            'coaches' => $coaches
         ];
         break;
 

@@ -32,6 +32,16 @@ if (!$data && !empty($_POST)) {
                 'message' => $data['message'] ?? '',
                 'is_active' => $data['is_active'] ?? 0
             ];
+        } else if (in_array($data['action'], ['add_coach', 'update_coach'])) {
+            $data['coach'] = [
+                'id' => $data['id'] ?? null,
+                'name' => $data['name'] ?? '',
+                'role' => $data['role'] ?? '',
+                'bio' => $data['bio'] ?? '',
+                'achievements' => $data['achievements'] ?? '',
+                'is_active' => $data['is_active'] ?? 0,
+                'existing_image' => $data['existing_image'] ?? ''
+            ];
         }
     }
 }
@@ -237,6 +247,24 @@ switch ($action) {
         }
         break;
 
+    case 'update_lead':
+        verifyToken($data, $conn);
+        try {
+            $stmt = $conn->prepare("UPDATE leads SET name=:n, email=:e, message=:m, status=:s WHERE id=:id");
+            $stmt->execute([':n' => $data['name'], ':e' => $data['email'], ':m' => $data['message'], ':s' => $data['status'], ':id' => $data['id']]);
+            echo json_encode(["status" => "success"]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
+        break;
+
+    case 'delete_lead':
+        verifyToken($data, $conn);
+        try {
+            $stmt = $conn->prepare("DELETE FROM leads WHERE id = :id");
+            $stmt->execute([':id' => $data['id']]);
+            echo json_encode(["status" => "success"]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
+        break;
+
     // --- ENROLMENTS MANAGEMENT ---
     case 'get_enrolments':
         verifyToken($data, $conn);
@@ -258,6 +286,24 @@ switch ($action) {
         } catch (PDOException $e) {
             echo json_encode(["status" => "error", "message" => $e->getMessage()]);
         }
+        break;
+
+    case 'update_enrolment':
+        verifyToken($data, $conn);
+        try {
+            $stmt = $conn->prepare("UPDATE enrolments SET student_name=:sn, parent_email=:pe, student_type=:st, country_timezone=:ct, status=:s WHERE id=:id");
+            $stmt->execute([':sn' => $data['student_name'], ':pe' => $data['parent_email'], ':st' => $data['student_type'], ':ct' => $data['country_timezone'], ':s' => $data['status'], ':id' => $data['id']]);
+            echo json_encode(["status" => "success"]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
+        break;
+
+    case 'delete_enrolment':
+        verifyToken($data, $conn);
+        try {
+            $stmt = $conn->prepare("DELETE FROM enrolments WHERE id = :id");
+            $stmt->execute([':id' => $data['id']]);
+            echo json_encode(["status" => "success"]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
         break;
 
     // --- COURSES MANAGEMENT ---
@@ -546,6 +592,49 @@ switch ($action) {
         verifyToken($data, $conn);
         try {
             $stmt = $conn->prepare("DELETE FROM testimonials WHERE id = :id");
+            $stmt->execute([':id' => $data['id']]);
+            echo json_encode(["status" => "success"]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
+        break;
+
+
+
+    // --- COACHES MANAGEMENT ---
+    case 'get_coaches':
+        try { // Public
+            $stmt = $conn->query("SELECT * FROM coaches ORDER BY created_at ASC");
+            echo json_encode(["status" => "success", "coaches" => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
+        break;
+
+    case 'add_coach':
+        verifyToken($data, $conn);
+        $c = $data['coach'];
+        $uploadedPath = handleImageUpload('image');
+        $imageUrl = $uploadedPath ? $uploadedPath : ($c['existing_image'] ?? '');
+        try {
+            $stmt = $conn->prepare("INSERT INTO coaches (name, role, bio, achievements, image_url, is_active) VALUES (:n, :r, :b, :ach, :i, :a)");
+            $stmt->execute([':n' => $c['name'], ':r' => $c['role'], ':b' => $c['bio'], ':ach' => $c['achievements'], ':i' => $imageUrl, ':a' => $c['is_active']]);
+            echo json_encode(["status" => "success"]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
+        break;
+
+    case 'update_coach':
+        verifyToken($data, $conn);
+        $c = $data['coach'];
+        $uploadedPath = handleImageUpload('image');
+        $imageUrl = $uploadedPath ? $uploadedPath : ($c['existing_image'] ?? '');
+        try {
+            $stmt = $conn->prepare("UPDATE coaches SET name=:n, role=:r, bio=:b, achievements=:ach, image_url=:i, is_active=:a WHERE id=:id");
+            $stmt->execute([':n' => $c['name'], ':r' => $c['role'], ':b' => $c['bio'], ':ach' => $c['achievements'], ':i' => $imageUrl, ':a' => $c['is_active'], ':id' => $c['id']]);
+            echo json_encode(["status" => "success"]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
+        break;
+
+    case 'delete_coach':
+        verifyToken($data, $conn);
+        try {
+            $stmt = $conn->prepare("DELETE FROM coaches WHERE id = :id");
             $stmt->execute([':id' => $data['id']]);
             echo json_encode(["status" => "success"]);
         } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }

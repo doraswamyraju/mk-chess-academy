@@ -101,7 +101,10 @@ const FeaturedArticles = ({ posts }) => {
                                     <p className="text-sm font-semibold text-[var(--accent-red)] mb-2">{post.category}</p>
                                     <h3 className="text-xl font-bold text-[var(--dark-blue)] mb-3 flex-grow">{post.title}</h3>
                                     <p className="text-[var(--text-light)] mb-4">{post.excerpt}</p>
-                                    <button onClick={() => navigate(`/blog/${post.id}`)} className="text-left font-bold text-[var(--primary-blue)] hover:underline mt-auto">Read More &rarr;</button>
+                                    <button onClick={() => {
+                                        const slug = post.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+                                        navigate(`/blog/${post.id}-${slug}`);
+                                    }} className="text-left font-bold text-[var(--primary-blue)] hover:underline mt-auto">Read More &rarr;</button>
                                 </div>
                             </div>
                         </InteractiveArea>

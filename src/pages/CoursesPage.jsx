@@ -53,14 +53,27 @@ const CourseSelector = () => (
     </Section>
 );
 
-const IndianStudentCourses = () => (
+const IndianStudentCourses = ({ courses }) => (
     <Section bgColor="var(--light-bg)" divider="waves" dividerColor="var(--white)">
-        <h2 className="text-4xl font-bold text-center text-[var(--dark-blue)] mb-4">For Indian Students</h2>
+        <h2 className="text-4xl font-bold text-center text-[var(--dark-blue)] mb-4">Core Indian Curriculum</h2>
         <p className="text-center text-[var(--text-light)] max-w-3xl mx-auto mb-12">Our curriculum is designed to build a strong foundation and prepare students for success in the vibrant Indian chess circuit.</p>
         <div className="grid md:grid-cols-3 gap-8">
-            <InteractiveArea className="w-full"><div className="bg-white p-8 rounded-lg shadow-lg h-full transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"><h3 className="text-2xl font-bold text-[var(--dark-blue)] mb-3">Beginners</h3><p className="text-[var(--text-light)]">Master the fundamentals, from piece movement to basic checkmates.</p></div></InteractiveArea>
-            <InteractiveArea className="w-full"><div className="bg-white p-8 rounded-lg shadow-lg h-full transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"><h3 className="text-2xl font-bold text-[var(--dark-blue)] mb-3">Intermediate</h3><p className="text-[var(--text-light)]">Dive into opening theory, middlegame strategy, and essential endgames.</p></div></InteractiveArea>
-            <InteractiveArea className="w-full"><div className="bg-white p-8 rounded-lg shadow-lg h-full transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"><h3 className="text-2xl font-bold text-[var(--dark-blue)] mb-3">Advanced</h3><p className="text-[var(--text-light)]">Refine your skills with advanced tactics and tournament preparation.</p></div></InteractiveArea>
+            {courses && courses.length > 0 ? courses.map(course => (
+                <InteractiveArea key={course.id} className="w-full">
+                    <div className="bg-white p-8 rounded-lg shadow-lg h-full transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
+                        <h3 className="text-2xl font-bold text-[var(--dark-blue)] mb-3">{course.title}</h3>
+                        <p className="text-[var(--text-light)] mb-4">{course.level}</p>
+                        <ul className="space-y-2 text-sm text-[var(--text-dark)] flex-grow">
+                            {(course.features || '').split(',').map((feat, i) => feat.trim() && (
+                                <li key={i} className="flex items-center">
+                                    <CheckCircleIcon className="w-4 h-4 mr-2 text-green-500 flex-shrink-0" />
+                                    <span>{feat.trim()}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </InteractiveArea>
+            )) : <p className="col-span-3 text-center text-gray-500">Curriculum loading...</p>}
         </div>
     </Section>
 );
@@ -164,11 +177,28 @@ const FinalCTA = () => (
 
 // --- MAIN COURSES PAGE COMPONENT ---
 const CoursesPage = () => {
+    const [courses, setCourses] = React.useState([]);
+
+    React.useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                const { postToApi } = await import('../utils/api.js');
+                const data = await postToApi('api_public.php', { action: 'get_public_content' });
+                if (data.status === 'success') {
+                    setCourses(data.courses || []);
+                }
+            } catch (err) {
+                console.error("Failed to fetch courses", err);
+            }
+        };
+        fetchCourses();
+    }, []);
+
     return (
         <main>
             <CoursesHero />
             <CourseSelector />
-            <IndianStudentCourses />
+            <IndianStudentCourses courses={courses} />
             <ForeignStudentCourses />
             <ProgramTypes />
             <SpecializedCourses />

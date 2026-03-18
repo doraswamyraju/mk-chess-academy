@@ -9,45 +9,7 @@ const PlayCircleIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width
 const GlobeIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>);
 const UsersIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>);
 
-// --- PAGE-SPECIFIC DATA ---
-const coach = {
-    name: 'G Hema Chandra Mouli',
-    titles: ['Senior National Arbiter', 'Chess in Schools Trainer', 'National Instructor', 'Arena Grand Master'],
-    rating: 1864,
-    image: 'https://placehold.co/800x800/1A237E/FFFFFF?text=G.H.C.+Mouli',
-    bannerImage: 'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?q=80&w=2070&auto=format&fit=crop',
-    quote: "Every pawn is a potential queen. My mission is to unlock that potential in every student.",
-    bio: {
-        early: "From a young age, Hema Chandra was captivated by the infinite possibilities on the 64 squares. His journey began in local clubs in Rajahmundry, where his passion for strategy and competition quickly became apparent.",
-        career: "Over a decade of competitive play saw him achieve numerous accolades in state and national tournaments. His transition to coaching was a natural evolution, driven by a desire to share his deep understanding of the game with the next generation.",
-        ratings: "Consistently maintaining an International Rating above 1800, Hema Chandra's performance is a testament to his strategic prowess and dedication."
-    },
-    philosophy: {
-        approach: "My teaching method is built on a foundation of strong fundamentals, tactical awareness, and creative problem-solving. I believe in a personalized approach, adapting to each student's learning style.",
-        drills: "I emphasize 'Pattern Recognition Drills' to build intuitive decision-making and 'Endgame Simulation' to ensure students can convert advantages into victories.",
-        focus: "Students can expect a supportive yet challenging environment. We will work not only on technical skills but also on the psychological aspects of competition, such as focus and resilience."
-    },
-    achievements: [
-        { year: 2023, title: "Awarded 'Senior National Arbiter' title by AICF" },
-        { year: 2022, title: "Certified as a 'Chess in Schools' Trainer" },
-        { year: 2020, title: "Top 10 Finish, AP State Senior Championship" },
-        { year: 2018, title: "Achieved FIDE 'National Instructor' title" },
-    ],
-    experience: {
-        collaborations: "Has collaborated with several top chess academies across Andhra Pradesh and has served as an official arbiter in numerous FIDE-rated events.",
-        international: "Coached students from over 15 countries through our online program, adapting to various cultural backgrounds and time zones.",
-        languages: "English, Telugu"
-    },
-    successStories: [
-        { name: "S.K. (U-14)", story: "Under Mouli sir's guidance, my rating increased by 300 points in one year, and I won my first district-level tournament." },
-        { name: "Parent of Riya", story: "His patient and methodical teaching style has been perfect for my daughter. She not only plays better but also enjoys the game more than ever." }
-    ],
-    faq: [
-        { q: "What is your primary focus for beginner students?", a: "For beginners, my focus is on building a strong love for the game. We start with fundamentals, basic tactics, and lots of fun, interactive exercises to keep them engaged." },
-        { q: "How do you prepare students for tournaments?", a: "Tournament preparation involves analyzing opponents' games, mastering specific opening repertoires, and intensive psychological training to handle pressure." },
-        { q: "What is a typical one-on-one session like?", a: "A session usually involves reviewing the student's recent games, working on a specific area of weakness (like tactics or endgames), and playing training games with immediate feedback." }
-    ]
-};
+// --- DYNAMIC DATA ---
 
 // --- REUSABLE HELPER COMPONENTS ---
 const Section = ({ children, bgColor = 'var(--white)', divider = null, dividerColor = 'var(--light-bg)' }) => (
@@ -254,18 +216,74 @@ const ContactAndSocial = () => (
 
 // --- MAIN COACH PAGE COMPONENT ---
 const CoachPage = () => {
+    const [coaches, setCoaches] = useState([]);
+    
+    React.useEffect(() => {
+        const fetchCoaches = async () => {
+            try {
+                const { postToApi } = await import('../utils/api.js');
+                const data = await postToApi('api_public.php', { action: 'get_public_content' });
+                if (data.status === 'success') {
+                    setCoaches(data.coaches || []);
+                }
+            } catch (err) {
+                console.error("Failed to fetch coaches", err);
+            }
+        };
+        fetchCoaches();
+    }, []);
+
+    const processCoachData = (c) => {
+        let bioJson = {};
+        let achJson = {};
+        try { bioJson = JSON.parse(c.bio); } catch(e) {}
+        try { achJson = JSON.parse(c.achievements); } catch(e) {}
+
+        return {
+            name: c.name,
+            titles: c.role ? c.role.split(',') : [],
+            image: c.image_url || 'https://placehold.co/800x800/1A237E/FFFFFF?text=Coach',
+            bannerImage: achJson.bannerImage || 'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?q=80&w=2070&auto=format&fit=crop',
+            quote: achJson.quote || '',
+            bio: {
+                early: bioJson.early || '',
+                career: bioJson.career || '',
+                ratings: bioJson.ratings || ''
+            },
+            philosophy: {
+                approach: achJson.philApproach || '',
+                drills: achJson.philDrills || '',
+                focus: achJson.philFocus || ''
+            },
+            experience: {
+                collaborations: achJson.expCollab || '',
+                international: achJson.expIntl || '',
+                languages: achJson.expLang || ''
+            },
+            achievements: achJson.achievementsList ? achJson.achievementsList.split('\n').filter(s=>s.trim()).map(t => ({ year: '-', title: t.trim() })) : [],
+            faq: [],
+            successStories: []
+        };
+    };
+
     return (
         <main>
-            <CoachHero coach={coach} />
-            <Biography bio={coach.bio} />
-            <CoachingPhilosophy philosophy={coach.philosophy} />
-            <Achievements achievements={coach.achievements} />
+            {coaches.map((rawCoach, idx) => {
+                const c = processCoachData(rawCoach);
+                return (
+                    <div key={rawCoach.id}>
+                        <CoachHero coach={c} />
+                        {(c.bio.early || c.bio.career || c.bio.ratings) && <Biography bio={c.bio} />}
+                        {(c.philosophy.approach || c.philosophy.drills || c.philosophy.focus) && <CoachingPhilosophy philosophy={c.philosophy} />}
+                        {c.achievements.length > 0 && <Achievements achievements={c.achievements} />}
+                        {(c.experience.collaborations || c.experience.international) && <CoachingExperience experience={c.experience} />}
+                    </div>
+                );
+            })}
+            
             <SampleGames />
-            <CoachingExperience experience={coach.experience} />
-            <SuccessStories stories={coach.successStories} />
             <Multimedia />
             <Booking />
-            <FAQ faqs={coach.faq} />
             <ContactAndSocial />
         </main>
     );
