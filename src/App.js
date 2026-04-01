@@ -33,6 +33,7 @@ import AdminFAQ from './pages/admin/AdminFAQ';
 import AdminGallery from './pages/admin/AdminGallery';
 import AdminTestimonials from './pages/admin/AdminTestimonials';
 import AdminAnnouncements from './pages/admin/AdminAnnouncements';
+import CoachProfilePage from './pages/CoachProfilePage';
 
 // --- THEME & STYLES ---
 const StyleInjector = () => (
@@ -153,6 +154,9 @@ function App() {
                     
                     {/* Public Single Blog Post Route */}
                     <Route path="/blog/:id" element={<SingleBlogPostPage />} />
+
+                    {/* Individual Coach Profile Route */}
+                    <Route path="/coaches/:id" element={<CoachProfilePage />} />
 
                     {/* Public Site Catch-all (retains old state-based behavior) */}
                     <Route path="/*" element={<PublicApp />} />

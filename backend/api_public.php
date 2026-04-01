@@ -83,7 +83,7 @@ switch ($action) {
         break;
 
     case 'get_blog_post':
-        $id = $_GET['id'] ?? ($_POST['id'] ?? null);
+        $id = $_GET['id'] ?? ($_POST['id'] ?? ($jsonData['id'] ?? null));
         if (!$id) {
             $response = ['status' => 'error', 'message' => 'Post ID is required'];
             break;

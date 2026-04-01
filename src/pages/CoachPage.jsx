@@ -1,224 +1,13 @@
-import React, { useState } from 'react';
-import InteractiveArea from '../components/InteractiveArea'; // Assuming this is in src/components
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import InteractiveArea from '../components/InteractiveArea';
 
-// --- PAGE-SPECIFIC ICONS ---
-const StarIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>);
-const BookOpenIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>);
-const BrainCircuitIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 2a2.5 2.5 0 0 0-2.5 2.5v.75a2.5 2.5 0 0 0 5 0V4.5A2.5 2.5 0 0 0 12 2Z"/><path d="M4.5 9.5A2.5 2.5 0 0 0 7 12v0a2.5 2.5 0 0 0-2.5 2.5"/><path d="M19.5 9.5A2.5 2.5 0 0 1 17 12v0a2.5 2.5 0 0 1 2.5 2.5"/><path d="M12 12a2.5 2.5 0 0 0-2.5 2.5v.75a2.5 2.5 0 0 0 5 0V14.5A2.5 2.5 0 0 0 12 12Z"/><path d="M4.5 14.5v-5"/><path d="M19.5 14.5v-5"/><path d="M12 12V7.5"/><path d="M9.5 12H7.5"/><path d="M14.5 12H17"/><path d="M12 17.25V22"/><path d="M7 14.5a2.5 2.5 0 0 1-2.5-2.5"/><path d="M17 14.5a2.5 2.5 0 0 0 2.5-2.5"/></svg>);
-const PlayCircleIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>);
-const GlobeIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>);
-const UsersIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>);
-
-// --- DYNAMIC DATA ---
-
-// --- REUSABLE HELPER COMPONENTS ---
-const Section = ({ children, bgColor = 'var(--white)', divider = null, dividerColor = 'var(--light-bg)' }) => (
-    <section className="relative py-20" style={{ backgroundColor: bgColor }}>
-        <div className="container mx-auto px-6 z-10 relative">{children}</div>
-        {divider && <ShapeDivider type={divider} fillColor={dividerColor} />}
-    </section>
-);
-
-const ShapeDivider = ({ type, fillColor }) => (
-    <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none" style={{ transform: type === 'waves' ? '' : 'rotate(180deg)' }}>
-        {type === 'waves' ? (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-[calc(100%+1.3px)] h-[100px]">
-                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" style={{ fill: fillColor }}></path>
-            </svg>
-        ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-[calc(100%+1.3px)] h-[80px]">
-                <path d="M1200 120L0 16.48 0 0 1200 0 1200 120z" style={{ fill: fillColor }}></path>
-            </svg>
-        )}
-    </div>
-);
-
-
-// --- COACH PAGE SECTION COMPONENTS ---
-const CoachHero = ({ coach }) => (
-    <section className="relative text-white flex items-center justify-center text-center overflow-hidden py-20 md:py-32">
-        <div className="absolute inset-0 w-full h-full bg-cover bg-center hero-parallax" style={{ backgroundImage: `url('${coach.bannerImage}')` }} />
-        <div className="absolute inset-0 bg-black bg-opacity-60"></div>
-        <div className="relative z-10 p-6 container mx-auto">
-            <div className="grid md:grid-cols-5 gap-8 items-center">
-                <div className="md:col-span-2">
-                    <InteractiveArea onHoverType="queen" className="w-full">
-                        <img src={coach.image} alt={coach.name} className="rounded-full shadow-2xl w-full max-w-sm mx-auto ring-8 ring-white/20 transition-all duration-300 hover:ring-white/40 hover:scale-105" />
-                    </InteractiveArea>
-                </div>
-                <div className="md:col-span-3 text-center md:text-left">
-                    <h1 className="text-5xl md:text-6xl font-black">{coach.name}</h1>
-                    <div className="flex flex-wrap justify-center md:justify-start gap-2 my-4">
-                        {coach.titles.map(title => (
-                            <span key={title} className="bg-white/10 text-white text-xs font-semibold px-3 py-1 rounded-full">{title}</span>
-                        ))}
-                    </div>
-                    <blockquote className="mt-6 text-xl italic text-gray-300 border-l-4 border-[var(--accent-red)] pl-4">
-                        "{coach.quote}"
-                    </blockquote>
-                </div>
-            </div>
-        </div>
-    </section>
-);
-
-const Biography = ({ bio }) => (
-    <Section divider="slant" dividerColor="var(--light-bg)">
-        <h2 className="text-4xl font-bold text-center text-[var(--dark-blue)] mb-12">Biography</h2>
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto text-center">
-             <InteractiveArea className="w-full">
-                <div className="bg-white p-8 rounded-lg shadow-lg h-full transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
-                    <h3 className="text-2xl font-bold text-[var(--dark-blue)] mb-3">Early Journey</h3>
-                    <p className="text-[var(--text-light)]">{bio.early}</p>
-                </div>
-            </InteractiveArea>
-            <InteractiveArea className="w-full">
-                <div className="bg-white p-8 rounded-lg shadow-lg h-full transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
-                    <h3 className="text-2xl font-bold text-[var(--dark-blue)] mb-3">Career Highlights</h3>
-                    <p className="text-[var(--text-light)]">{bio.career}</p>
-                </div>
-            </InteractiveArea>
-            <InteractiveArea className="w-full">
-                <div className="bg-white p-8 rounded-lg shadow-lg h-full transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
-                    <h3 className="text-2xl font-bold text-[var(--dark-blue)] mb-3">Titles & Rankings</h3>
-                    <p className="text-[var(--text-light)]">{bio.ratings}</p>
-                </div>
-            </InteractiveArea>
-        </div>
-    </Section>
-);
-
-const CoachingPhilosophy = ({ philosophy }) => (
-    <Section bgColor="var(--light-bg)" divider="waves" dividerColor="var(--white)">
-        <h2 className="text-4xl font-bold text-center text-[var(--dark-blue)] mb-12">Coaching Philosophy</h2>
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <InteractiveArea className="w-full"><div className="bg-white p-8 rounded-lg shadow-lg h-full transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"><BookOpenIcon className="w-12 h-12 text-[var(--accent-red)] mb-4" /><h3 className="text-xl font-bold text-[var(--dark-blue)] mb-2">Teaching Approach</h3><p className="text-[var(--text-light)]">{philosophy.approach}</p></div></InteractiveArea>
-            <InteractiveArea className="w-full"><div className="bg-white p-8 rounded-lg shadow-lg h-full transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"><BrainCircuitIcon className="w-12 h-12 text-[var(--accent-red)] mb-4" /><h3 className="text-xl font-bold text-[var(--dark-blue)] mb-2">Signature Drills</h3><p className="text-[var(--text-light)]">{philosophy.drills}</p></div></InteractiveArea>
-            <InteractiveArea className="w-full"><div className="bg-white p-8 rounded-lg shadow-lg h-full transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"><StarIcon className="w-12 h-12 text-[var(--accent-red)] mb-4" /><h3 className="text-xl font-bold text-[var(--dark-blue)] mb-2">Student Focus</h3><p className="text-[var(--text-light)]">{philosophy.focus}</p></div></InteractiveArea>
-        </div>
-    </Section>
-);
-
-const Achievements = ({ achievements }) => (
-    <Section divider="slant" dividerColor="var(--light-bg)">
-        <h2 className="text-4xl font-bold text-center text-[var(--dark-blue)] mb-12">Achievements & Accolades</h2>
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {achievements.map((item, index) => (
-                <InteractiveArea key={index} className="w-full">
-                    <div className="bg-white p-6 rounded-lg shadow-lg flex items-center space-x-4 transform transition-all duration-300 hover:shadow-xl hover:scale-105">
-                        <div className="bg-[var(--accent-red)] text-white font-black text-2xl p-4 rounded-md">{item.year}</div>
-                        <div>
-                            <h3 className="text-lg font-bold text-[var(--dark-blue)]">{item.title}</h3>
-                        </div>
-                    </div>
-                </InteractiveArea>
-            ))}
-        </div>
-    </Section>
-);
-
-const SampleGames = () => (
-    <Section bgColor="var(--light-bg)" divider="waves" dividerColor="var(--white)">
-        <h2 className="text-4xl font-bold text-center text-[var(--dark-blue)] mb-12">Sample Games & Analyses</h2>
-        <div className="grid md:grid-cols-2 gap-8">
-            <InteractiveArea onHoverType="queen" className="w-full"><div className="bg-white rounded-lg shadow-lg p-6 text-center transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"><img src="https://placehold.co/600x400/1A237E/FFFFFF?text=Interactive+Game+Board" className="w-full rounded-md mb-4"/><h3 className="text-xl font-bold">Mouli vs. IM (2021)</h3><p className="text-[var(--text-light)]">A decisive victory showcasing tactical brilliance.</p></div></InteractiveArea>
-            <InteractiveArea onHoverType="queen" className="w-full"><div className="bg-white rounded-lg shadow-lg p-6 text-center transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"><img src="https://placehold.co/600x400/2962FF/FFFFFF?text=Video+Analysis" className="w-full rounded-md mb-4"/><h3 className="text-xl font-bold">Endgame Masterclass</h3><p className="text-[var(--text-light)]">In-depth video analysis of a complex rook endgame.</p></div></InteractiveArea>
-        </div>
-    </Section>
-);
-
-const CoachingExperience = ({ experience }) => (
-    <Section divider="slant" dividerColor="var(--light-bg)">
-        <h2 className="text-4xl font-bold text-center text-[var(--dark-blue)] mb-12">Coaching Experience</h2>
-        <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
-            <InteractiveArea className="w-full"><div className="bg-gray-50 p-6 rounded-lg shadow-md h-full transform transition-all duration-300 hover:shadow-xl hover:scale-105"><UsersIcon className="w-8 h-8 text-[var(--primary-blue)] mb-3"/><h3 className="text-xl font-bold mb-2">Institutes & Collaborations</h3><p className="text-[var(--text-light)]">{experience.collaborations}</p></div></InteractiveArea>
-            <InteractiveArea className="w-full"><div className="bg-gray-50 p-6 rounded-lg shadow-md h-full transform transition-all duration-300 hover:shadow-xl hover:scale-105"><GlobeIcon className="w-8 h-8 text-[var(--primary-blue)] mb-3"/><h3 className="text-xl font-bold mb-2">International Exposure</h3><p className="text-[var(--text-light)]">{experience.international}</p><p className="mt-2 font-semibold">Languages: {experience.languages}</p></div></InteractiveArea>
-        </div>
-    </Section>
-);
-
-const SuccessStories = ({ stories }) => (
-    <Section bgColor="var(--light-bg)" divider="waves" dividerColor="var(--white)">
-        <h2 className="text-4xl font-bold text-center text-[var(--dark-blue)] mb-12">Success Stories</h2>
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {stories.map(item => (
-                <InteractiveArea key={item.name} className="w-full"><div className="bg-white p-6 rounded-lg shadow-lg h-full transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"><p className="italic text-[var(--text-light)]">"{item.story}"</p><p className="text-right mt-4 font-bold text-[var(--primary-blue)]">- {item.name}</p></div></InteractiveArea>
-            ))}
-        </div>
-    </Section>
-);
-
-const Multimedia = () => (
-    <Section divider="slant" dividerColor="var(--light-bg)">
-        <h2 className="text-4xl font-bold text-center text-[var(--dark-blue)] mb-12">Multimedia Gallery</h2>
-        <div className="grid md:grid-cols-2 gap-8">
-            <InteractiveArea onHoverType="queen" className="w-full"><div className="relative rounded-lg shadow-lg overflow-hidden group"><img src="https://placehold.co/800x450/1A237E/FFFFFF?text=Video+Introduction" className="w-full"/><div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><PlayCircleIcon className="w-20 h-20 text-white"/></div></div></InteractiveArea>
-            <InteractiveArea onHoverType="queen" className="w-full"><div className="relative rounded-lg shadow-lg overflow-hidden group"><img src="https://placehold.co/800x450/2962FF/FFFFFF?text=Lesson+Snippet" className="w-full"/><div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><PlayCircleIcon className="w-20 h-20 text-white"/></div></div></InteractiveArea>
-        </div>
-    </Section>
-);
-
-const Booking = () => (
-    <Section bgColor="var(--light-bg)" divider="waves" dividerColor="var(--white)">
-        <div className="text-center max-w-2xl mx-auto">
-            <h2 className="text-4xl font-bold text-[var(--dark-blue)]">Ready to Elevate Your Game?</h2>
-            <p className="text-[var(--text-light)] mt-4 text-lg">Book a one-on-one session with me and let's start working towards your chess goals together.</p>
-            <InteractiveArea><button className="mt-8 bg-[var(--accent-red)] text-white font-bold py-4 px-10 rounded-lg text-xl transform hover:scale-105 transition-transform">Book a Session</button></InteractiveArea>
-        </div>
-    </Section>
-);
-
-const FAQ = ({ faqs }) => {
-    const [openIndex, setOpenIndex] = useState(null);
-    const toggleFAQ = index => { setOpenIndex(openIndex === index ? null : index); };
-    return (
-        <Section divider="slant" dividerColor="var(--light-bg)">
-            <div className="container mx-auto px-6 max-w-3xl">
-                <div className="text-center mb-12"><h2 className="text-4xl font-bold text-[var(--dark-blue)]">Coach FAQs</h2></div>
-                <div className="space-y-4">
-                    {faqs.map((faq, index) => (
-                        <InteractiveArea key={index} className="w-full">
-                            <div className="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md">
-                                <button onClick={() => toggleFAQ(index)} className="w-full flex justify-between items-center p-5 text-left font-semibold text-lg text-[var(--dark-blue)]">
-                                    <span>{faq.q}</span>
-                                    <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center text-[var(--primary-blue)]"><span className={`transform transition-transform duration-300 ${openIndex === index ? 'rotate-45' : ''}`}>+</span></div>
-                                </button>
-                                <div className={`transition-all duration-500 ease-in-out ${openIndex === index ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}><p className="px-5 pb-5 text-[var(--text-light)]">{faq.a}</p></div>
-                            </div>
-                        </InteractiveArea>
-                    ))}
-                </div>
-            </div>
-        </Section>
-    );
-};
-
-const ContactAndSocial = () => (
-    <Section bgColor="var(--light-bg)">
-        <div className="text-center mb-16"><h2 className="text-4xl font-bold text-[var(--dark-blue)]">Contact & Social Profiles</h2><p className="text-[var(--text-light)] mt-4 max-w-3xl mx-auto text-lg">Connect with me directly for inquiries or follow my chess journey online.</p></div>
-        <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-12">
-            <form className="space-y-4">
-                <InteractiveArea className="w-full"><input type="text" placeholder="Your Name" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow" /></InteractiveArea>
-                <InteractiveArea className="w-full"><input type="email" placeholder="Your Email" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow" /></InteractiveArea>
-                <InteractiveArea className="w-full"><textarea placeholder="Your Message" rows="5" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow"></textarea></InteractiveArea>
-                <InteractiveArea><button type="submit" className="w-full bg-[var(--accent-red)] text-white font-bold py-3 px-6 rounded-md hover:bg-opacity-90 transition-colors">Send Inquiry</button></InteractiveArea>
-            </form>
-            <div className="space-y-4">
-                <h3 className="text-2xl font-bold text-[var(--dark-blue)]">Follow Me</h3>
-                <InteractiveArea className="block"><a href="#" className="flex items-center space-x-3 p-3 bg-white rounded-lg shadow-sm hover:shadow-md hover:bg-gray-50 transition-all duration-300"><span className="font-bold text-[var(--primary-blue)]">FIDE Profile</span></a></InteractiveArea>
-                <InteractiveArea className="block"><a href="#" className="flex items-center space-x-3 p-3 bg-white rounded-lg shadow-sm hover:shadow-md hover:bg-gray-50 transition-all duration-300"><span className="font-bold text-[var(--primary-blue)]">Chess.com</span></a></InteractiveArea>
-                <InteractiveArea className="block"><a href="#" className="flex items-center space-x-3 p-3 bg-white rounded-lg shadow-sm hover:shadow-md hover:bg-gray-50 transition-all duration-300"><span className="font-bold text-[var(--primary-blue)]">YouTube Channel</span></a></InteractiveArea>
-            </div>
-        </div>
-    </Section>
-);
-
-
-// --- MAIN COACH PAGE COMPONENT ---
 const CoachPage = () => {
     const [coaches, setCoaches] = useState([]);
-    
-    React.useEffect(() => {
+    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
+
+    useEffect(() => {
         const fetchCoaches = async () => {
             try {
                 const { postToApi } = await import('../utils/api.js');
@@ -228,63 +17,125 @@ const CoachPage = () => {
                 }
             } catch (err) {
                 console.error("Failed to fetch coaches", err);
+            } finally {
+                setLoading(false);
             }
         };
         fetchCoaches();
     }, []);
 
-    const processCoachData = (c) => {
-        let bioJson = {};
-        let achJson = {};
-        try { bioJson = JSON.parse(c.bio); } catch(e) {}
-        try { achJson = JSON.parse(c.achievements); } catch(e) {}
-
-        return {
-            name: c.name,
-            titles: c.role ? c.role.split(',') : [],
-            image: c.image_url || 'https://placehold.co/800x800/1A237E/FFFFFF?text=Coach',
-            bannerImage: achJson.bannerImage || 'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?q=80&w=2070&auto=format&fit=crop',
-            quote: achJson.quote || '',
-            bio: {
-                early: bioJson.early || '',
-                career: bioJson.career || '',
-                ratings: bioJson.ratings || ''
-            },
-            philosophy: {
-                approach: achJson.philApproach || '',
-                drills: achJson.philDrills || '',
-                focus: achJson.philFocus || ''
-            },
-            experience: {
-                collaborations: achJson.expCollab || '',
-                international: achJson.expIntl || '',
-                languages: achJson.expLang || ''
-            },
-            achievements: achJson.achievementsList ? achJson.achievementsList.split('\n').filter(s=>s.trim()).map(t => ({ year: '-', title: t.trim() })) : [],
-            faq: [],
-            successStories: []
-        };
-    };
-
     return (
-        <main>
-            {coaches.map((rawCoach, idx) => {
-                const c = processCoachData(rawCoach);
-                return (
-                    <div key={rawCoach.id}>
-                        <CoachHero coach={c} />
-                        {(c.bio.early || c.bio.career || c.bio.ratings) && <Biography bio={c.bio} />}
-                        {(c.philosophy.approach || c.philosophy.drills || c.philosophy.focus) && <CoachingPhilosophy philosophy={c.philosophy} />}
-                        {c.achievements.length > 0 && <Achievements achievements={c.achievements} />}
-                        {(c.experience.collaborations || c.experience.international) && <CoachingExperience experience={c.experience} />}
+        <main style={{ background: '#f8f9fa', minHeight: '100vh' }}>
+            {/* Hero Banner */}
+            <section style={{
+                background: 'linear-gradient(135deg, #1A237E 0%, #2962FF 100%)',
+                padding: '80px 24px',
+                textAlign: 'center',
+                color: '#fff',
+                position: 'relative',
+                overflow: 'hidden'
+            }}>
+                <div style={{ position: 'absolute', top: -80, right: -80, width: 280, height: 280, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
+                <div style={{ position: 'absolute', bottom: -60, left: -60, width: 200, height: 200, borderRadius: '50%', background: 'rgba(255,255,255,0.07)' }} />
+                <div style={{ position: 'relative', zIndex: 1 }}>
+                    <p style={{ color: '#FF3D00', fontWeight: 700, letterSpacing: 3, fontSize: 12, textTransform: 'uppercase', marginBottom: 12 }}>OUR TEAM</p>
+                    <h1 style={{ fontSize: 52, fontWeight: 900, margin: '0 0 16px', textShadow: '2px 2px 10px rgba(0,0,0,0.2)' }}>Meet Our Coaches</h1>
+                    <p style={{ fontSize: 20, color: 'rgba(255,255,255,0.8)', maxWidth: 560, margin: '0 auto' }}>
+                        Led by certified, internationally-rated chess professionals dedicated to unlocking your full potential.
+                    </p>
+                </div>
+            </section>
+
+            {/* Coaches Grid */}
+            <section style={{ padding: '72px 24px', maxWidth: 1100, margin: '0 auto' }}>
+                {loading ? (
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: '60px' }}>
+                        <div style={{ width: 56, height: 56, border: '4px solid #1A237E', borderTop: '4px solid transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
                     </div>
-                );
-            })}
-            
-            <SampleGames />
-            <Multimedia />
-            <Booking />
-            <ContactAndSocial />
+                ) : coaches.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '60px 24px' }}>
+                        <div style={{ fontSize: 64, marginBottom: 20 }}>♟</div>
+                        <h2 style={{ color: '#1A237E', fontSize: 28, fontWeight: 800 }}>Coming Soon</h2>
+                        <p style={{ color: '#6c757d', marginTop: 8, fontSize: 16 }}>Our instructor profiles are being prepared.</p>
+                        <p style={{ marginTop: 16, color: '#f59e0b', background: '#fffbeb', border: '1px solid #fcd34d', borderRadius: 8, padding: '10px 20px', display: 'inline-block', fontSize: 14 }}>
+                            ⚠️ If coaches were added in admin, make sure to set their status to <strong>Active</strong>.
+                        </p>
+                    </div>
+                ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 32 }}>
+                        {coaches.map(coach => (
+                            <InteractiveArea key={coach.id} onHoverType="queen" className="w-full h-full">
+                                <div
+                                    onClick={() => navigate(`/coaches/${coach.id}`)}
+                                    style={{
+                                        background: '#fff',
+                                        borderRadius: 16,
+                                        boxShadow: '0 6px 30px rgba(0,0,0,0.08)',
+                                        padding: '36px 28px',
+                                        textAlign: 'center',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        transition: 'transform 0.3s, box-shadow 0.3s',
+                                        borderBottom: '4px solid #2962FF',
+                                        height: '100%',
+                                        boxSizing: 'border-box'
+                                    }}
+                                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-8px)'; e.currentTarget.style.boxShadow = '0 20px 50px rgba(0,0,0,0.15)'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 6px 30px rgba(0,0,0,0.08)'; }}
+                                >
+                                    {coach.image_url ? (
+                                        <img
+                                            src={coach.image_url}
+                                            alt={coach.name}
+                                            style={{ width: 140, height: 140, borderRadius: '50%', objectFit: 'cover', marginBottom: 20, border: '5px solid #e8edf8', display: 'block' }}
+                                        />
+                                    ) : (
+                                        <div style={{
+                                            width: 140, height: 140, borderRadius: '50%', marginBottom: 20,
+                                            background: 'linear-gradient(135deg, #1A237E, #2962FF)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            fontSize: 56, fontWeight: 900, color: '#fff', border: '5px solid #e8edf8'
+                                        }}>
+                                            {coach.name.charAt(0)}
+                                        </div>
+                                    )}
+                                    <h2 style={{ color: '#1A237E', fontSize: 22, fontWeight: 800, margin: '0 0 6px' }}>{coach.name}</h2>
+                                    <p style={{ color: '#2962FF', fontWeight: 700, fontSize: 14, marginBottom: 14 }}>{coach.role}</p>
+                                    <p style={{
+                                        color: '#555', fontSize: 14, lineHeight: 1.6, marginBottom: 20,
+                                        display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden'
+                                    }}>
+                                        {coach.bio}
+                                    </p>
+                                    {/* Achievement badges */}
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center', marginBottom: 24 }}>
+                                        {(coach.achievements || '').split(',').slice(0, 3).map((a, i) => a.trim() && (
+                                            <span key={i} style={{ background: '#eff6ff', color: '#2962FF', fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20 }}>
+                                                {a.trim()}
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <button style={{
+                                        marginTop: 'auto',
+                                        background: '#2962FF', color: '#fff',
+                                        border: 'none', borderRadius: 30,
+                                        padding: '10px 28px', fontWeight: 700, fontSize: 14,
+                                        cursor: 'pointer', transition: 'background 0.2s'
+                                    }}
+                                        onMouseEnter={e => e.currentTarget.style.background = '#1A237E'}
+                                        onMouseLeave={e => e.currentTarget.style.background = '#2962FF'}
+                                    >
+                                        View Full Profile →
+                                    </button>
+                                </div>
+                            </InteractiveArea>
+                        ))}
+                    </div>
+                )}
+            </section>
         </main>
     );
 };
