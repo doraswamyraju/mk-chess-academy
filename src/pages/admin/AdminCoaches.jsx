@@ -63,7 +63,7 @@ const AdminCoaches = () => {
             role: coach.role || '',
             image: null,
             existing_image: coach.image_url || '',
-            is_active: parseInt(coach.is_active),
+            is_active: coach.is_active === '1' || coach.is_active === 1 ? 1 : 0,
             quote: achJson.quote || '',
             bannerImage: achJson.bannerImage || '',
             bioEarly: bioJson.early || '',
@@ -120,16 +120,16 @@ const AdminCoaches = () => {
         submitData.append('action', editingId ? 'update_coach' : 'add_coach');
         submitData.append('token', token);
         
-        // Match the PHP structure for $data['coach']
-        submitData.append('coach[name]', formData.name);
-        submitData.append('coach[role]', formData.role);
-        submitData.append('coach[bio]', packagedBio);
-        submitData.append('coach[achievements]', packagedAchievements);
-        submitData.append('coach[is_active]', formData.is_active);
+        // Send as flat fields so PHP can reconstruct $data['coach'] correctly
+        submitData.append('name', formData.name);
+        submitData.append('role', formData.role);
+        submitData.append('bio', packagedBio);
+        submitData.append('achievements', packagedAchievements);
+        submitData.append('is_active', formData.is_active === 1 ? '1' : '0');
         
         if (editingId) {
-            submitData.append('coach[id]', editingId);
-            submitData.append('coach[existing_image]', formData.existing_image);
+            submitData.append('id', editingId);
+            submitData.append('existing_image', formData.existing_image);
         }
         if (formData.image) {
             submitData.append('image', formData.image);
@@ -174,7 +174,7 @@ const AdminCoaches = () => {
                                 {formData.existing_image && <img src={formData.existing_image} alt="Current" className="mt-2 h-20 rounded" />}
                             </div>
                             <div><label className="block text-sm font-medium">Banner Image URL</label><input type="text" value={formData.bannerImage} onChange={e => setFormData({...formData, bannerImage: e.target.value})} className="mt-1 w-full border rounded p-2 text-sm text-gray-500" placeholder="https://unsplash.com/..."/></div>
-                            <div><label className="block text-sm font-medium">Active Status</label><select value={formData.is_active} onChange={e => setFormData({...formData, is_active: parseInt(e.target.value)})} className="mt-1 w-full border rounded p-2"><option value={1}>Active</option><option value={0}>Inactive</option></select></div>
+                            <div><label className="block text-sm font-medium">Active Status</label><select value={String(formData.is_active)} onChange={e => setFormData({...formData, is_active: e.target.value === '1' ? 1 : 0})} className="mt-1 w-full border rounded p-2"><option value="1">Active</option><option value="0">Inactive</option></select></div>
                         </div>
 
                         {/* Biography */}
