@@ -22,6 +22,7 @@ if (!$data && !empty($_POST)) {
                 'title' => $data['title'] ?? '',
                 'category' => $data['category'] ?? '',
                 'excerpt' => $data['excerpt'] ?? '',
+                'content' => $data['content'] ?? '',
                 'is_published' => $data['is_published'] ?? 0,
                 'image_url' => $data['existing_image'] ?? ''
             ];
@@ -39,7 +40,7 @@ if (!$data && !empty($_POST)) {
                 'role' => $data['role'] ?? '',
                 'bio' => $data['bio'] ?? '',
                 'achievements' => $data['achievements'] ?? '',
-                'is_active' => $data['is_active'] ?? 0,
+                'is_active' => isset($data['is_active']) ? intval($data['is_active']) : 0,
                 'existing_image' => $data['existing_image'] ?? ''
             ];
         }
@@ -358,8 +359,8 @@ switch ($action) {
         $imageUrl = $uploadedPath ? $uploadedPath : $b['image_url'];
 
         try {
-            $stmt = $conn->prepare("INSERT INTO blog_posts (title, category, excerpt, image_url, is_published) VALUES (:t, :c, :e, :i, :p)");
-            $stmt->execute([':t' => $b['title'], ':c' => $b['category'], ':e' => $b['excerpt'], ':i' => $imageUrl, ':p' => $b['is_published']]);
+            $stmt = $conn->prepare("INSERT INTO blog_posts (title, category, excerpt, content, image_url, is_published) VALUES (:t, :c, :e, :ct, :i, :p)");
+            $stmt->execute([':t' => $b['title'], ':c' => $b['category'], ':e' => $b['excerpt'], ':ct' => $b['content'] ?? '', ':i' => $imageUrl, ':p' => $b['is_published']]);
             echo json_encode(["status" => "success", "image_url" => $imageUrl]);
         } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
         break;
@@ -371,8 +372,8 @@ switch ($action) {
         $imageUrl = $uploadedPath ? $uploadedPath : $b['image_url'];
 
         try {
-            $stmt = $conn->prepare("UPDATE blog_posts SET title=:t, category=:c, excerpt=:e, image_url=:i, is_published=:p WHERE id=:id");
-            $stmt->execute([':t' => $b['title'], ':c' => $b['category'], ':e' => $b['excerpt'], ':i' => $imageUrl, ':p' => $b['is_published'], ':id' => $b['id']]);
+            $stmt = $conn->prepare("UPDATE blog_posts SET title=:t, category=:c, excerpt=:e, content=:ct, image_url=:i, is_published=:p WHERE id=:id");
+            $stmt->execute([':t' => $b['title'], ':c' => $b['category'], ':e' => $b['excerpt'], ':ct' => $b['content'] ?? '', ':i' => $imageUrl, ':p' => $b['is_published'], ':id' => $b['id']]);
             echo json_encode(["status" => "success", "image_url" => $imageUrl]);
         } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
         break;

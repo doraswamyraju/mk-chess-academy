@@ -7,7 +7,7 @@ const AdminBlog = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
-    const [currentPost, setCurrentPost] = useState({ id: null, title: '', category: '', excerpt: '', image_file: null, image_url: '', is_published: 0 });
+    const [currentPost, setCurrentPost] = useState({ id: null, title: '', category: '', excerpt: '', content: '', image_file: null, image_url: '', is_published: 0 });
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -48,6 +48,7 @@ const AdminBlog = () => {
             formData.append('title', currentPost.title);
             formData.append('category', currentPost.category);
             formData.append('excerpt', currentPost.excerpt);
+            formData.append('content', currentPost.content || '');
             formData.append('is_published', currentPost.is_published ? 1 : 0);
             
             if (currentPost.id) {
@@ -64,7 +65,7 @@ const AdminBlog = () => {
 
             if (data.status === 'success') {
                 setIsEditing(false);
-                setCurrentPost({ id: null, title: '', category: '', excerpt: '', image_file: null, image_url: '', is_published: 0 });
+                setCurrentPost({ id: null, title: '', category: '', excerpt: '', content: '', image_file: null, image_url: '', is_published: 0 });
                 fetchPosts();
             } else {
                 alert(data.message);
@@ -96,7 +97,7 @@ const AdminBlog = () => {
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold text-gray-900">Manage Blog Posts</h2>
                 {!isEditing && (
-                    <button onClick={() => { setIsEditing(true); setCurrentPost({ id: null, title: '', category: '', excerpt: '', image_file: null, image_url: '', is_published: 0 }); }} className="bg-[var(--primary-blue)] hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    <button onClick={() => { setIsEditing(true); setCurrentPost({ id: null, title: '', category: '', excerpt: '', content: '', image_file: null, image_url: '', is_published: 0 }); }} className="bg-[var(--primary-blue)] hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                         Add New Post
                     </button>
                 )}
@@ -124,7 +125,11 @@ const AdminBlog = () => {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Short Excerpt</label>
-                            <textarea required value={currentPost.excerpt} onChange={(e) => setCurrentPost({...currentPost, excerpt: e.target.value})} rows="3" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"></textarea>
+                            <textarea required value={currentPost.excerpt} onChange={(e) => setCurrentPost({...currentPost, excerpt: e.target.value})} rows="3" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border" placeholder="A brief summary shown on the blog listing page..."></textarea>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Full Content <span className="text-gray-400 font-normal">(the full article body)</span></label>
+                            <textarea value={currentPost.content || ''} onChange={(e) => setCurrentPost({...currentPost, content: e.target.value})} rows="12" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border font-mono" placeholder="Write the full blog post content here..."></textarea>
                         </div>
                         <div className="flex items-center">
                             <input type="checkbox" checked={currentPost.is_published} onChange={(e) => setCurrentPost({...currentPost, is_published: e.target.checked ? 1 : 0})} id="is_published" className="h-4 w-4 text-[var(--primary-blue)] border-gray-300 rounded" />
