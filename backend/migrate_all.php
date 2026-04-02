@@ -67,5 +67,20 @@ safeExec($conn, "CREATE TABLE IF NOT EXISTS `coaches` (
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
 
+// 5. Puzzles Table
+echo "<b>Creating `puzzles` table...</b><br>";
+safeExec($conn, "CREATE TABLE IF NOT EXISTS `puzzles` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `title` VARCHAR(255) NOT NULL,
+    `fen` TEXT NOT NULL,
+    `solution` TEXT NOT NULL,
+    `difficulty` VARCHAR(50) NOT NULL,
+    `theme` VARCHAR(100) NOT NULL,
+    `hint` TEXT,
+    `is_weekly` TINYINT(1) DEFAULT 0,
+    `is_active` TINYINT(1) DEFAULT 1,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)");
+
 echo "<br><b>Migration completed! You can now access the Admin Dashboard.</b>";
 ?>
