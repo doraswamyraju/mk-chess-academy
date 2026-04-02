@@ -561,7 +561,7 @@ const ContactSection = () => (
                 <div className="space-y-4 text-[var(--text-dark)]">
                     <p><strong>Address:</strong> Manasa Hospital Rd, opposite to Coastal Bommireddy Srinivas Hospital, Danavai Peta, Rajamahendravaram, AP 533103</p>
                     <p><strong>Phone:</strong> +91-6281250967, +91-9885302468</p>
-                    <p><strong>Email:</strong> karthikgopal04@gmail.com</p>
+                    <p><strong>Email:</strong> modernknightchessacademy@gmail.com</p>
                 </div>
             </div>
             <form onSubmit={async (e) => {

@@ -92,9 +92,13 @@ const SingleBlogPostPage = () => {
                             Published on {new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                         </p>
                         
-                        <div className="prose prose-lg prose-blue max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap">
-                            {post.content}
-                        </div>
+                        <div
+                            className="prose prose-lg prose-blue max-w-none text-gray-700 leading-relaxed"
+                            style={{
+                                lineHeight: '1.9',
+                            }}
+                            dangerouslySetInnerHTML={{ __html: post.content }}
+                        />
                     </div>
                 </article>
 

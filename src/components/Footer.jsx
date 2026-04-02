@@ -100,8 +100,7 @@ const Footer = () => {
                  <li className="flex items-start">
                     <MailIcon className="w-5 h-5 mr-3 mt-1 flex-shrink-0 text-[var(--primary-blue)]"/>
                     <div className="text-gray-400 break-all">
-                        <p>karthikgopal04@gmail.com</p>
-                        <p>chandramouli545454@gmail.com</p>
+                        <p>modernknightchessacademy@gmail.com</p>
                     </div>
                 </li>
             </ul>

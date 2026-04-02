@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import InteractiveArea from '../components/InteractiveArea'; // Assuming this is in src/components
 
 // Note: You need to install chess.js and react-chessboard for the puzzle to work
@@ -76,7 +77,6 @@ const BlogHero = () => (
     </section>
 );
 
-import { useNavigate } from 'react-router-dom';
 
 const FeaturedArticles = ({ posts }) => {
     const navigate = useNavigate();
