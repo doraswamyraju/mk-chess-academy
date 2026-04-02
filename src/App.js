@@ -33,6 +33,7 @@ import AdminFAQ from './pages/admin/AdminFAQ';
 import AdminGallery from './pages/admin/AdminGallery';
 import AdminTestimonials from './pages/admin/AdminTestimonials';
 import AdminAnnouncements from './pages/admin/AdminAnnouncements';
+import AdminPuzzles from './pages/admin/AdminPuzzles';
 import CoachProfilePage from './pages/CoachProfilePage';
 
 // --- THEME & STYLES ---
@@ -150,6 +151,7 @@ function App() {
                         <Route path="faq" element={<AdminFAQ />} />
                         <Route path="gallery" element={<AdminGallery />} />
                         <Route path="testimonials" element={<AdminTestimonials />} />
+                        <Route path="puzzles" element={<AdminPuzzles />} />
                     </Route>
                     
                     {/* Public Single Blog Post Route */}

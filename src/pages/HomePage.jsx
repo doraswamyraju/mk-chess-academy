@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import InteractiveArea from '../components/InteractiveArea';
+import Section from '../components/Section';
+import InteractivePuzzleDisplay from '../components/InteractivePuzzleDisplay';
 
 // --- PAGE-SPECIFIC ICONS ---
 const StarIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>);
@@ -9,27 +11,6 @@ const ChevronLeftIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" widt
 const ChevronRightIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="9 18 15 12 9 6"></polyline></svg>);
 const CheckIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="20 6 9 17 4 12"></polyline></svg>);
 
-// --- REUSABLE HELPER COMPONENTS ---
-const Section = ({ children, bgColor = 'var(--white)', divider = null, dividerColor = 'var(--light-bg)' }) => (
-    <section className="relative py-16 md:py-20" style={{ backgroundColor: bgColor }}>
-        <div className="container mx-auto px-4 sm:px-6 z-10 relative">{children}</div>
-        {divider && <ShapeDivider type={divider} fillColor={dividerColor} />}
-    </section>
-);
-
-const ShapeDivider = ({ type, fillColor }) => (
-    <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none" style={{ transform: type === 'waves' ? '' : 'rotate(180deg)' }}>
-        {type === 'waves' ? (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-[calc(100%+1.3px)] h-[100px]">
-                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" style={{ fill: fillColor }}></path>
-            </svg>
-        ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-[calc(100%+1.3px)] h-[80px]">
-                <path d="M1200 120L0 16.48 0 0 1200 0 1200 120z" style={{ fill: fillColor }}></path>
-            </svg>
-        )}
-    </div>
-);
 
 // --- ENROLLMENT MODAL ---
 const EnrollmentModal = ({ course, onClose }) => {
@@ -699,7 +680,8 @@ const HomePage = () => {
                         gallery: data.gallery || [],
                         testimonials: data.testimonials || [],
                         courses: data.courses || [],
-                        coaches: data.coaches || []
+                        coaches: data.coaches || [],
+                        puzzles: data.puzzles || []
                     });
                 }
             } catch (err) {
@@ -730,6 +712,36 @@ const HomePage = () => {
             <GallerySection announcements={publicData.announcements} images={publicData.gallery} />
             <GoogleReviews />
             <TestimonialsSection testimonials={publicData.testimonials} />
+            
+            {/* Puzzle of the Week Section */}
+            {publicData.puzzles && publicData.puzzles.length > 0 && (
+                <Section bgColor="var(--light-bg)" divider="waves" dividerColor="var(--white)">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="text-center mb-10">
+                            <h2 className="text-4xl font-bold text-[var(--dark-blue)] mb-4">Puzzle of the Week</h2>
+                            <p className="text-gray-600">Challenge yourself with our weekly tactical puzzle! Can you find the best continuation?</p>
+                        </div>
+                        <InteractivePuzzleDisplay 
+                            puzzle={publicData.puzzles.find(p => p.is_weekly === 1) || publicData.puzzles[0]} 
+                            isWeekly={true} 
+                        />
+                        <div className="text-center mt-8">
+                             <a 
+                                href="/blog" 
+                                className="inline-block bg-[var(--primary-blue)] text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                                onClick={(e) => {
+                                    // Custom logic to navigate to blog page via the shared setPage state if needed, 
+                                    // but since it's a catch-all route, a standard link or a state trigger might be needed.
+                                    // For now, let's assume the user can click it.
+                                }}
+                            >
+                                View Puzzle Archive
+                            </a>
+                        </div>
+                    </div>
+                </Section>
+            )}
+
             <ContactSection />
             <BlogSection blogs={publicData.blogs} />
             <FAQ faqs={publicData.faqs} />

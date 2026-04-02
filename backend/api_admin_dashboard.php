@@ -43,6 +43,18 @@ if (!$data && !empty($_POST)) {
                 'is_active' => isset($data['is_active']) ? intval($data['is_active']) : 0,
                 'existing_image' => $data['existing_image'] ?? ''
             ];
+        } else if (in_array($data['action'], ['add_puzzle', 'update_puzzle'])) {
+             $data['puzzle'] = [
+                'id' => $data['id'] ?? null,
+                'title' => $data['title'] ?? '',
+                'fen' => $data['fen'] ?? '',
+                'solution' => $data['solution'] ?? '[]',
+                'difficulty' => $data['difficulty'] ?? 'Easy',
+                'theme' => $data['theme'] ?? 'Tactics',
+                'hint' => $data['hint'] ?? '',
+                'is_weekly' => isset($data['is_weekly']) ? intval($data['is_weekly']) : 0,
+                'is_active' => isset($data['is_active']) ? intval($data['is_active']) : 1
+            ];
         }
     }
 }
@@ -636,6 +648,58 @@ switch ($action) {
         verifyToken($data, $conn);
         try {
             $stmt = $conn->prepare("DELETE FROM coaches WHERE id = :id");
+            $stmt->execute([':id' => $data['id']]);
+            echo json_encode(["status" => "success"]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
+        break;
+
+    // --- PUZZLES MANAGEMENT ---
+    case 'get_puzzles':
+        verifyToken($data, $conn);
+        try {
+            $stmt = $conn->query("SELECT * FROM puzzles ORDER BY created_at DESC");
+            echo json_encode(["status" => "success", "puzzles" => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
+        break;
+
+    case 'add_puzzle':
+        verifyToken($data, $conn);
+        $p = $data['puzzle'];
+        try {
+            if ($p['is_weekly'] == 1) {
+                $conn->query("UPDATE puzzles SET is_weekly = 0");
+            }
+            $stmt = $conn->prepare("INSERT INTO puzzles (title, fen, solution, difficulty, theme, hint, is_weekly, is_active) VALUES (:t, :f, :s, :d, :th, :h, :w, :a)");
+            $stmt->execute([
+                ':t' => $p['title'], ':f' => $p['fen'], ':s' => $p['solution'], 
+                ':d' => $p['difficulty'], ':th' => $p['theme'], ':h' => $p['hint'], 
+                ':w' => $p['is_weekly'], ':a' => $p['is_active']
+            ]);
+            echo json_encode(["status" => "success"]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
+        break;
+
+    case 'update_puzzle':
+        verifyToken($data, $conn);
+        $p = $data['puzzle'];
+        try {
+            if ($p['is_weekly'] == 1) {
+                $conn->query("UPDATE puzzles SET is_weekly = 0");
+            }
+            $stmt = $conn->prepare("UPDATE puzzles SET title=:t, fen=:f, solution=:s, difficulty=:d, theme=:th, hint=:h, is_weekly=:w, is_active=:a WHERE id=:id");
+            $stmt->execute([
+                ':t' => $p['title'], ':f' => $p['fen'], ':s' => $p['solution'], 
+                ':d' => $p['difficulty'], ':th' => $p['theme'], ':h' => $p['hint'], 
+                ':w' => $p['is_weekly'], ':a' => $p['is_active'], ':id' => $p['id']
+            ]);
+            echo json_encode(["status" => "success"]);
+        } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }
+        break;
+
+    case 'delete_puzzle':
+        verifyToken($data, $conn);
+        try {
+            $stmt = $conn->prepare("DELETE FROM puzzles WHERE id = :id");
             $stmt->execute([':id' => $data['id']]);
             echo json_encode(["status" => "success"]);
         } catch (PDOException $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }

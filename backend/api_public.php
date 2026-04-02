@@ -70,6 +70,19 @@ switch ($action) {
             $coaches = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {}
 
+        // Fetch Puzzles
+        $puzzles = [];
+        try {
+            $stmt = $conn->query("SELECT * FROM puzzles WHERE is_active = 1 ORDER BY created_at DESC");
+            $puzzles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Map solution from string to array if it's stored as JSON string
+            foreach ($puzzles as &$p) {
+                $p['solution'] = json_decode($p['solution'], true) ?: [$p['solution']];
+                $p['is_weekly'] = (int)$p['is_weekly'];
+            }
+        } catch (Exception $e) {}
+
         $response = [
             'status' => 'success',
             'announcements' => $announcements,
@@ -78,7 +91,8 @@ switch ($action) {
             'gallery' => $gallery,
             'testimonials' => $testimonials,
             'courses' => $courses,
-            'coaches' => $coaches
+            'coaches' => $coaches,
+            'puzzles' => $puzzles
         ];
         break;
 
