@@ -656,7 +656,7 @@ const FAQ = ({ faqs }) => {
 
 
 // --- MAIN HOMEPAGE COMPONENT ---
-const HomePage = () => {
+const HomePage = ({ setPage }) => {
     const [publicData, setPublicData] = useState({
         announcements: [],
         blogs: [],
@@ -726,17 +726,12 @@ const HomePage = () => {
                             isWeekly={true} 
                         />
                         <div className="text-center mt-8">
-                             <a 
-                                href="/blog" 
-                                className="inline-block bg-[var(--primary-blue)] text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                                onClick={(e) => {
-                                    // Custom logic to navigate to blog page via the shared setPage state if needed, 
-                                    // but since it's a catch-all route, a standard link or a state trigger might be needed.
-                                    // For now, let's assume the user can click it.
-                                }}
+                            <button 
+                                onClick={() => setPage && setPage('Blog')}
+                                className="inline-block bg-[var(--primary-blue)] text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 cursor-pointer"
                             >
-                                View Puzzle Archive
-                            </a>
+                                View Puzzle Archive →
+                            </button>
                         </div>
                     </div>
                 </Section>

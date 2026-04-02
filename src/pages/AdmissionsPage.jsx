@@ -75,75 +75,189 @@ const Eligibility = () => (
 
 const RegistrationForms = () => {
     const [activeTab, setActiveTab] = useState('indian');
+    const [submitting, setSubmitting] = useState(false);
+    const [success, setSuccess] = useState(false);
+
+    const handleSubmit = async (e, studentType) => {
+        e.preventDefault();
+        setSubmitting(true);
+        try {
+            const formData = new FormData(e.target);
+            const data = {
+                action: 'submit_enrolment',
+                student_name: formData.get('student_name'),
+                parent_email: formData.get('parent_email'),
+                phone: formData.get('phone') || '',
+                course_name: formData.get('course_name') || '',
+                student_type: studentType,
+                country_timezone: formData.get('country_timezone') || ''
+            };
+            const { postToApi } = await import('../utils/api.js');
+            await postToApi('api_client_forms.php', data);
+            setSuccess(true);
+            e.target.reset();
+            setTimeout(() => setSuccess(false), 5000);
+        } catch (err) {
+            alert('Error submitting application: ' + err.message);
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const inputClass = "w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow bg-white";
+
     return (
         <Section divider="slant" dividerColor="var(--light-bg)">
-            <h2 className="text-4xl font-bold text-center text-[var(--dark-blue)] mb-12">Registration Forms</h2>
+            <h2 className="text-4xl font-bold text-center text-[var(--dark-blue)] mb-4">Enroll Now</h2>
+            <p className="text-center text-[var(--text-light)] mb-12 max-w-2xl mx-auto">Fill out the form below and our team will get back to you within 24 hours to schedule your free demo class.</p>
             <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-xl p-8">
-                <div className="flex border-b mb-6">
-                    <button onClick={() => setActiveTab('indian')} className={`py-2 px-6 font-semibold transition-colors duration-300 ${activeTab === 'indian' ? 'border-b-2 border-[var(--accent-red)] text-[var(--accent-red)]' : 'text-gray-500 hover:text-[var(--accent-red)]'}`}>For Indian Students</button>
-                    <button onClick={() => setActiveTab('international')} className={`py-2 px-6 font-semibold transition-colors duration-300 ${activeTab === 'international' ? 'border-b-2 border-[var(--accent-red)] text-[var(--accent-red)]' : 'text-gray-500 hover:text-[var(--accent-red)]'}`}>For Foreign Students</button>
+                <div className="flex border-b mb-8">
+                    <button onClick={() => setActiveTab('indian')} className={`py-3 px-6 font-semibold transition-colors duration-300 ${activeTab === 'indian' ? 'border-b-2 border-[var(--accent-red)] text-[var(--accent-red)]' : 'text-gray-500 hover:text-[var(--accent-red)]'}`}>🇮🇳 For Indian Students</button>
+                    <button onClick={() => setActiveTab('international')} className={`py-3 px-6 font-semibold transition-colors duration-300 ${activeTab === 'international' ? 'border-b-2 border-[var(--accent-red)] text-[var(--accent-red)]' : 'text-gray-500 hover:text-[var(--accent-red)]'}`}>🌍 For Foreign Students</button>
                 </div>
+
+                {success && (
+                    <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-6 text-center font-semibold">
+                        ✅ Application submitted successfully! We will contact you within 24 hours.
+                    </div>
+                )}
+
                 {activeTab === 'indian' ? (
-                    <form onSubmit={async (e) => {
-                        e.preventDefault();
-                        const submitBtn = e.target.querySelector('button[type="submit"]');
-                        const originalText = submitBtn.innerText;
-                        try {
-                            submitBtn.innerText = 'Sending...';
-                            submitBtn.disabled = true;
-                            
-                            const data = {
-                                action: 'submit_enrolment',
-                                student_name: e.target.student_name.value,
-                                parent_email: e.target.parent_email.value,
-                                student_type: 'indian'
-                            };
-                            const { postToApi } = await import('../utils/api.js');
-                            await postToApi('api_client_forms.php', data);
-                            alert('Application submitted successfully! We will contact you soon.');
-                            e.target.reset();
-                        } catch (err) {
-                            alert('Error submitting application: ' + err.message);
-                        } finally {
-                            submitBtn.innerText = originalText;
-                            submitBtn.disabled = false;
-                        }
-                    }} className="space-y-4">
-                        <InteractiveArea className="w-full"><input type="text" name="student_name" required placeholder="Student's Name" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow" /></InteractiveArea>
-                        <InteractiveArea className="w-full"><input type="email" name="parent_email" required placeholder="Parent's Email" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow" /></InteractiveArea>
-                        <InteractiveArea><button type="submit" className="w-full bg-[var(--accent-red)] text-white font-bold py-3 px-6 rounded-md hover:bg-opacity-90 transition-colors">Submit Application</button></InteractiveArea>
+                    <form onSubmit={(e) => handleSubmit(e, 'indian')} className="space-y-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <InteractiveArea className="w-full">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Student's Name *</label>
+                                    <input type="text" name="student_name" required placeholder="Enter student's full name" className={inputClass} />
+                                </div>
+                            </InteractiveArea>
+                            <InteractiveArea className="w-full">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Student's Age *</label>
+                                    <select name="student_age" required className={inputClass}>
+                                        <option value="">Select Age Group</option>
+                                        <option value="5-7">5 - 7 years</option>
+                                        <option value="8-10">8 - 10 years</option>
+                                        <option value="11-14">11 - 14 years</option>
+                                        <option value="15-18">15 - 18 years</option>
+                                        <option value="18+">18+ (Adult)</option>
+                                    </select>
+                                </div>
+                            </InteractiveArea>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <InteractiveArea className="w-full">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Parent's / Guardian's Email *</label>
+                                    <input type="email" name="parent_email" required placeholder="parent@email.com" className={inputClass} />
+                                </div>
+                            </InteractiveArea>
+                            <InteractiveArea className="w-full">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone / WhatsApp Number *</label>
+                                    <input type="tel" name="phone" required placeholder="+91 98765 43210" className={inputClass} />
+                                </div>
+                            </InteractiveArea>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <InteractiveArea className="w-full">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Preferred Course</label>
+                                    <select name="course_name" className={inputClass}>
+                                        <option value="">Select a Course</option>
+                                        <option value="Beginner">Beginner Course</option>
+                                        <option value="Intermediate">Intermediate Course</option>
+                                        <option value="Advanced">Advanced Course</option>
+                                        <option value="Tournament Prep">Tournament Preparation</option>
+                                        <option value="Private Coaching">Private 1-on-1 Coaching</option>
+                                        <option value="Not Sure">Not Sure - Need Guidance</option>
+                                    </select>
+                                </div>
+                            </InteractiveArea>
+                            <InteractiveArea className="w-full">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Chess Experience</label>
+                                    <select name="country_timezone" className={inputClass}>
+                                        <option value="">Select Experience Level</option>
+                                        <option value="Complete Beginner">Complete Beginner</option>
+                                        <option value="Knows Basic Rules">Knows Basic Rules</option>
+                                        <option value="Plays Regularly">Plays Regularly</option>
+                                        <option value="Tournament Player">Tournament Player</option>
+                                        <option value="Rated Player">FIDE/National Rated Player</option>
+                                    </select>
+                                </div>
+                            </InteractiveArea>
+                        </div>
+                        <InteractiveArea className="w-full">
+                            <button type="submit" disabled={submitting} className="w-full bg-[var(--accent-red)] text-white font-bold py-4 px-6 rounded-md hover:bg-opacity-90 transition-colors text-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                                {submitting ? 'Submitting...' : '🎯 Submit Enrollment Application'}
+                            </button>
+                        </InteractiveArea>
                     </form>
                 ) : (
-                    <form onSubmit={async (e) => {
-                        e.preventDefault();
-                        const submitBtn = e.target.querySelector('button[type="submit"]');
-                        const originalText = submitBtn.innerText;
-                        try {
-                            submitBtn.innerText = 'Sending...';
-                            submitBtn.disabled = true;
-                            
-                            const data = {
-                                action: 'submit_enrolment',
-                                student_name: e.target.student_name.value,
-                                parent_email: e.target.parent_email.value,
-                                country_timezone: e.target.country_timezone.value,
-                                student_type: 'international'
-                            };
-                            const { postToApi } = await import('../utils/api.js');
-                            await postToApi('api_client_forms.php', data);
-                            alert('International Application submitted successfully!');
-                            e.target.reset();
-                        } catch (err) {
-                            alert('Error submitting application: ' + err.message);
-                        } finally {
-                            submitBtn.innerText = originalText;
-                            submitBtn.disabled = false;
-                        }
-                    }} className="space-y-4">
-                        <InteractiveArea className="w-full"><input type="text" name="student_name" required placeholder="Student's Name" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow" /></InteractiveArea>
-                        <InteractiveArea className="w-full"><input type="email" name="parent_email" required placeholder="Parent's Email" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow" /></InteractiveArea>
-                        <InteractiveArea className="w-full"><input type="text" name="country_timezone" required placeholder="Country & Time Zone" className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-[var(--primary-blue)] outline-none transition-shadow" /></InteractiveArea>
-                        <InteractiveArea><button type="submit" className="w-full bg-[var(--accent-red)] text-white font-bold py-3 px-6 rounded-md hover:bg-opacity-90 transition-colors">Submit International Application</button></InteractiveArea>
+                    <form onSubmit={(e) => handleSubmit(e, 'international')} className="space-y-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <InteractiveArea className="w-full">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Student's Name *</label>
+                                    <input type="text" name="student_name" required placeholder="Enter student's full name" className={inputClass} />
+                                </div>
+                            </InteractiveArea>
+                            <InteractiveArea className="w-full">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Student's Age *</label>
+                                    <select name="student_age" required className={inputClass}>
+                                        <option value="">Select Age Group</option>
+                                        <option value="5-7">5 - 7 years</option>
+                                        <option value="8-10">8 - 10 years</option>
+                                        <option value="11-14">11 - 14 years</option>
+                                        <option value="15-18">15 - 18 years</option>
+                                        <option value="18+">18+ (Adult)</option>
+                                    </select>
+                                </div>
+                            </InteractiveArea>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <InteractiveArea className="w-full">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Parent's / Guardian's Email *</label>
+                                    <input type="email" name="parent_email" required placeholder="parent@email.com" className={inputClass} />
+                                </div>
+                            </InteractiveArea>
+                            <InteractiveArea className="w-full">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone / WhatsApp Number *</label>
+                                    <input type="tel" name="phone" required placeholder="+1 234 567 8900" className={inputClass} />
+                                </div>
+                            </InteractiveArea>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <InteractiveArea className="w-full">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Country & Time Zone *</label>
+                                    <input type="text" name="country_timezone" required placeholder="e.g. USA - EST (UTC-5)" className={inputClass} />
+                                </div>
+                            </InteractiveArea>
+                            <InteractiveArea className="w-full">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Preferred Course</label>
+                                    <select name="course_name" className={inputClass}>
+                                        <option value="">Select a Course</option>
+                                        <option value="Beginner">Beginner Course</option>
+                                        <option value="Intermediate">Intermediate Course</option>
+                                        <option value="Advanced">Advanced Course</option>
+                                        <option value="Tournament Prep">Tournament Preparation</option>
+                                        <option value="Private Coaching">Private 1-on-1 Coaching</option>
+                                        <option value="Not Sure">Not Sure - Need Guidance</option>
+                                    </select>
+                                </div>
+                            </InteractiveArea>
+                        </div>
+                        <InteractiveArea className="w-full">
+                            <button type="submit" disabled={submitting} className="w-full bg-[var(--accent-red)] text-white font-bold py-4 px-6 rounded-md hover:bg-opacity-90 transition-colors text-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                                {submitting ? 'Submitting...' : '🌍 Submit International Application'}
+                            </button>
+                        </InteractiveArea>
                     </form>
                 )}
             </div>

@@ -101,7 +101,7 @@ const PublicApp = () => {
 
     const renderPage = () => {
         switch (page) {
-            case 'Home': return <HomePage />;
+            case 'Home': return <HomePage setPage={setPage} />;
             case 'About': return <AboutUsPage />;
             case 'Admissions': return <AdmissionsPage />;
             case 'Blog': return <BlogPage />;
@@ -110,7 +110,7 @@ const PublicApp = () => {
             case 'Courses': return <CoursesPage />;
             case 'Online Course': return <OnlineCoursePage />;
             case 'Testimonials': return <TestimonialsPage />;
-            default: return <HomePage />;
+            default: return <HomePage setPage={setPage} />;
         }
     };
 
