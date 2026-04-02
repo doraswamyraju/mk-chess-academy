@@ -75,7 +75,7 @@ const AdminPuzzles = () => {
             const data = await postToApi('api_admin_dashboard.php', {
                 action,
                 token,
-                ...currentPuzzle
+                puzzle: currentPuzzle
             });
 
             if (data.status === 'success') {
