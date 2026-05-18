@@ -205,5 +205,50 @@ try {
     echo "<span style='color:red;'>✘ Error seeding default courses: " . htmlspecialchars($e->getMessage()) . "</span><br>";
 }
 
+// 3. Seed Default Testimonials (Google Reviews)
+echo "<br><b>Seeding default testimonials...</b><br>";
+try {
+    $testimonials = [
+        [
+            'student_name' => 'Rahul S.',
+            'course_taken' => 'Rising Stars Program',
+            'review_text' => 'Excellent coaching! My son improved his game drastically within 3 months.',
+            'rating' => 5
+        ],
+        [
+            'student_name' => 'Priya M.',
+            'course_taken' => 'Little Knights Program',
+            'review_text' => 'The coaches are highly professional and patient. The environment is perfect for learning.',
+            'rating' => 5
+        ],
+        [
+            'student_name' => 'Anita Rao',
+            'course_taken' => 'Elite Champions Program',
+            'review_text' => 'MK Chess Academy is the best in the region. Their structured curriculum really helps.',
+            'rating' => 5
+        ],
+        [
+            'student_name' => 'Vikram K.',
+            'course_taken' => 'Tournament Preparation',
+            'review_text' => 'Great online classes and flexible timings. Highly recommended for aspiring players!',
+            'rating' => 5
+        ]
+    ];
+
+    $insertTestimonial = $conn->prepare("INSERT INTO `testimonials` (`student_name`, `course_taken`, `review_text`, `rating`, `is_active`) VALUES (:n, :c, :r, :rt, 1)");
+    foreach ($testimonials as $t) {
+        $insertTestimonial->execute([
+            ':n' => $t['student_name'],
+            ':c' => $t['course_taken'],
+            ':r' => $t['review_text'],
+            ':rt' => $t['rating']
+        ]);
+    }
+    echo "<span style='color:green;'>✔ Success: 4 default testimonials seeded.</span><br>";
+} catch (Exception $e) {
+    echo "<span style='color:red;'>✘ Error seeding default testimonials: " . htmlspecialchars($e->getMessage()) . "</span><br>";
+}
+
 echo "<br><b>Master migration complete! All 11 tables constructed and seeded with 100% correct matching columns!</b>";
 ?>
+

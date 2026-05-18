@@ -478,73 +478,40 @@ const GallerySection = ({ announcements, images }) => {
 
 const StarRating = ({ rating }) => (<div className="flex justify-center mb-4">{[...Array(5)].map((_, i) => <StarIcon key={i} className={`w-6 h-6 ${i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />)}</div>);
 
-const googleReviews = [
-    { name: "Rahul S.", rating: 5, text: "Excellent coaching! My son improved his game drastically within 3 months." },
-    { name: "Priya M.", rating: 5, text: "The coaches are highly professional and patient. The environment is perfect for learning." },
-    { name: "Anita Rao", rating: 5, text: "MK Chess Academy is the best in the region. Their structured curriculum really helps." },
-    { name: "Vikram K.", rating: 5, text: "Great online classes and flexible timings. Highly recommended for aspiring players!" }
-];
-
-const GoogleReviews = () => (
-    <Section bgColor="var(--light-bg)" divider="waves" dividerColor="var(--white)">
-        <div className="text-center mb-16"><h2 className="text-4xl font-bold text-[var(--dark-blue)]">What Our Students Say</h2><p className="text-[var(--text-light)] mt-4 max-w-3xl mx-auto text-lg">Direct feedback from our students and parents on Google.</p></div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {googleReviews.map((review, index) => (
-                <InteractiveArea key={index} className="w-full h-full">
-                    <div className="bg-white rounded-lg shadow-lg p-6 h-full flex flex-col text-center transform hover:-translate-y-2 transition-transform duration-300">
-                        <QuoteIcon className="w-8 h-8 mx-auto mb-4 text-gray-200" />
-                        <p className="text-[var(--text-light)] italic flex-grow">"{review.text}"</p>
-                        <div className="mt-6">
-                            <StarRating rating={review.rating} />
-                            <p className="font-bold text-[var(--primary-blue)]">- {review.name}</p>
-                        </div>
-                    </div>
-                </InteractiveArea>
-            ))}
-        </div>
-    </Section>
-);
-
 const TestimonialsSection = ({ testimonials }) => (
-    <Section bgColor="var(--white)" divider="slant" dividerColor="var(--light-bg)">
-        <div className="text-center mb-16"><h2 className="text-4xl font-bold text-[var(--dark-blue)]">A Champion's Journey</h2></div>
-        {testimonials.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">More champions coming soon...</div>
-        ) : (
-            <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+    <Section bgColor="var(--light-bg)" divider="waves" dividerColor="var(--white)">
+        <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-[var(--dark-blue)]">What Our Students Say</h2>
+            <p className="text-[var(--text-light)] mt-4 max-w-3xl mx-auto text-lg">Direct feedback from our students and parents.</p>
+        </div>
+        {testimonials && testimonials.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {testimonials.map(item => (
-                    <InteractiveArea key={item.id} onHoverType="queen" className="w-full">
+                    <InteractiveArea key={item.id} className="w-full h-full">
                         <AdminEditableWrapper type="testimonial" data={item}>
-                            <div className="bg-[var(--dark-blue)] text-white rounded-lg shadow-2xl p-8 flex flex-col h-full transform transition duration-300 hover:scale-[1.02]">
-                                <div className="flex items-center gap-6 mb-6">
-                                    {item.avatar_url ? (
-                                        <img src={item.avatar_url} alt={item.student_name} className="w-20 h-20 rounded-full flex-shrink-0 ring-4 ring-[var(--accent-red)] p-1 object-cover" />
-                                    ) : (
-                                        <div className="w-20 h-20 rounded-full flex-shrink-0 ring-4 ring-[var(--accent-red)] p-1 bg-white text-[var(--dark-blue)] flex items-center justify-center font-bold text-2xl">
-                                            {item.student_name.charAt(0)}
-                                        </div>
-                                    )}
-                                    <div>
-                                        <h4 className="font-bold text-xl text-white">{item.student_name}</h4>
-                                        <span className="text-sm text-gray-300">{item.course_taken}</span>
-                                        <div className="mt-2 text-yellow-400 text-sm">{'★'.repeat(item.rating)}{'☆'.repeat(5 - item.rating)}</div>
+                            <div className="bg-white rounded-lg shadow-lg p-6 h-full flex flex-col text-center transform hover:-translate-y-2 transition-transform duration-300 relative border border-gray-100">
+                                <QuoteIcon className="w-8 h-8 mx-auto mb-4 text-gray-200" />
+                                <p className="text-[var(--text-light)] italic flex-grow text-sm leading-relaxed">"{item.review_text}"</p>
+                                <div className="mt-6">
+                                    <div className="flex justify-center mb-3">
+                                        {[...Array(5)].map((_, i) => (
+                                            <span key={i} className={`text-xl ${i < item.rating ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
+                                        ))}
                                     </div>
-                                </div>
-                                <div className="flex-grow">
-                                    <p className="text-lg italic text-gray-300 leading-relaxed relative">
-                                        <span className="text-4xl text-[var(--accent-red)] absolute -left-4 -top-4 opacity-50">"</span>
-                                        {item.review_text}
-                                        <span className="text-4xl text-[var(--accent-red)] absolute -bottom-8 opacity-50">"</span>
-                                    </p>
+                                    <p className="font-bold text-[var(--primary-blue)]">- {item.student_name}</p>
+                                    {item.course_taken && <p className="text-xs text-gray-400 mt-0.5">{item.course_taken}</p>}
                                 </div>
                             </div>
                         </AdminEditableWrapper>
                     </InteractiveArea>
                 ))}
             </div>
+        ) : (
+            <div className="text-center text-gray-500 py-8">More dynamic reviews coming soon...</div>
         )}
     </Section>
 );
+
 
 const ContactSection = () => (
     <Section bgColor="var(--light-bg)" divider="waves" dividerColor="var(--white)">
@@ -738,7 +705,6 @@ const HomePage = ({ setPage }) => {
             <InstituteSnapshot coaches={publicData.coaches} />
             <CoursesSection courses={publicData.courses} />
             <GallerySection announcements={publicData.announcements} images={publicData.gallery} />
-            <GoogleReviews />
             <TestimonialsSection testimonials={publicData.testimonials} />
             
             {/* Puzzle of the Week Section */}
