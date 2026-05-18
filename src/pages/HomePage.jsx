@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import InteractiveArea from '../components/InteractiveArea';
 import Section from '../components/Section';
 import InteractivePuzzleDisplay from '../components/InteractivePuzzleDisplay';
+import AdminEditableWrapper from '../components/AdminEditableWrapper';
 
 // --- PAGE-SPECIFIC ICONS ---
 const StarIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>);
@@ -246,27 +247,29 @@ const InstituteSnapshot = ({ coaches }) => {
                 {coaches && coaches.length > 0 ? coaches.map(coach => (
                     <div key={coach.id} className="w-full md:w-1/2 lg:w-1/3 px-4">
                         <InteractiveArea onHoverType="queen" className="w-full h-full">
-                            <div
-                                onClick={() => navigate(`/coaches/${coach.id}`)}
-                                className="bg-gray-50 rounded-xl shadow-lg p-8 text-center h-full border-b-4 border-[var(--primary-blue)] flex flex-col transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 cursor-pointer"
-                            >
-                                {coach.image_url ? (
-                                    <img src={coach.image_url} alt={coach.name} className="w-36 h-36 rounded-full mx-auto mb-4 ring-4 ring-[var(--primary-blue)] p-1 object-cover" />
-                                ) : (
-                                    <div className="w-36 h-36 rounded-full mx-auto mb-4 ring-4 ring-[var(--primary-blue)] p-1 bg-[var(--dark-blue)] flex items-center justify-center text-white font-black text-4xl">{coach.name.charAt(0)}</div>
-                                )}
-                                <h3 className="text-2xl font-bold text-[var(--dark-blue)] font-sans">{coach.name}</h3>
-                                <p className="font-bold text-lg text-[var(--primary-blue)]">{coach.role}</p>
-                                <p className="text-sm text-gray-600 mt-2 mb-4 line-clamp-3">{coach.bio}</p>
-                                <div className="flex flex-wrap justify-center gap-2 mt-2">
-                                    {(coach.achievements || '').split(',').map((feat, i) => feat.trim() && (
-                                        <span key={i} className="bg-blue-100 text-[var(--primary-blue)] text-xs font-semibold px-3 py-1 rounded-full">{feat.trim()}</span>
-                                    ))}
+                            <AdminEditableWrapper type="coach" data={coach}>
+                                <div
+                                    onClick={() => navigate(`/coaches/${coach.id}`)}
+                                    className="bg-gray-50 rounded-xl shadow-lg p-8 text-center h-full border-b-4 border-[var(--primary-blue)] flex flex-col transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 cursor-pointer"
+                                >
+                                    {coach.image_url ? (
+                                        <img src={coach.image_url} alt={coach.name} className="w-36 h-36 rounded-full mx-auto mb-4 ring-4 ring-[var(--primary-blue)] p-1 object-cover" />
+                                    ) : (
+                                        <div className="w-36 h-36 rounded-full mx-auto mb-4 ring-4 ring-[var(--primary-blue)] p-1 bg-[var(--dark-blue)] flex items-center justify-center text-white font-black text-4xl">{coach.name.charAt(0)}</div>
+                                    )}
+                                    <h3 className="text-2xl font-bold text-[var(--dark-blue)] font-sans">{coach.name}</h3>
+                                    <p className="font-bold text-lg text-[var(--primary-blue)]">{coach.role}</p>
+                                    <p className="text-sm text-gray-600 mt-2 mb-4 line-clamp-3">{coach.bio}</p>
+                                    <div className="flex flex-wrap justify-center gap-2 mt-2">
+                                        {(coach.achievements || '').split(',').map((feat, i) => feat.trim() && (
+                                            <span key={i} className="bg-blue-100 text-[var(--primary-blue)] text-xs font-semibold px-3 py-1 rounded-full">{feat.trim()}</span>
+                                        ))}
+                                    </div>
+                                    <button className="mt-6 bg-[var(--primary-blue)] text-white text-sm font-bold py-2 px-5 rounded-full hover:bg-opacity-90 transition-colors">
+                                        View Full Profile →
+                                    </button>
                                 </div>
-                                <button className="mt-6 bg-[var(--primary-blue)] text-white text-sm font-bold py-2 px-5 rounded-full hover:bg-opacity-90 transition-colors">
-                                    View Full Profile →
-                                </button>
-                            </div>
+                            </AdminEditableWrapper>
                         </InteractiveArea>
                     </div>
                 )) : (
@@ -313,70 +316,73 @@ const CoursesSection = ({ courses }) => {
                                 const isMiddle = courses.length >= 3 && idx === Math.floor(courses.length / 2);
                                 const features = (course.features || '').split(',').map(f => f.trim()).filter(Boolean);
                                 return (
-                                    <div key={course.id} style={{
-                                        background: isMiddle ? '#1f2937' : '#1a2032',
-                                        border: isMiddle ? '2px solid #c9a84c' : '1px solid #2d3748',
-                                        borderRadius: 20,
-                                        padding: '36px 28px',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        position: 'relative',
-                                        transition: 'transform 0.3s, box-shadow 0.3s',
-                                        boxShadow: isMiddle ? '0 20px 60px rgba(201,168,76,0.2)' : 'none',
-                                    }}
-                                        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-8px)'; e.currentTarget.style.boxShadow = '0 20px 50px rgba(0,0,0,0.4)'; }}
-                                        onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = isMiddle ? '0 20px 60px rgba(201,168,76,0.2)' : 'none'; }}
-                                    >
-                                        {isMiddle && (
-                                            <div style={{
-                                                position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)',
-                                                background: '#c9a84c', color: '#111', fontWeight: 800, fontSize: 12,
-                                                padding: '4px 18px', borderRadius: 20, letterSpacing: 1, whiteSpace: 'nowrap'
-                                            }}>
-                                                MOST POPULAR
-                                            </div>
-                                        )}
-                                        {/* Icon */}
+                                    <AdminEditableWrapper key={course.id} type="course" data={course}>
                                         <div style={{
-                                            width: 52, height: 52, borderRadius: 14, background: 'rgba(201,168,76,0.15)',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            fontSize: 26, marginBottom: 20, border: '1px solid rgba(201,168,76,0.3)'
-                                        }}>
-                                            {courseIcons[idx % courseIcons.length]}
-                                        </div>
-                                        <h3 style={{ color: '#fff', fontSize: 22, fontWeight: 800, margin: '0 0 6px' }}>{course.title}</h3>
-                                        <p style={{ color: '#c9a84c', fontSize: 14, fontWeight: 600, marginBottom: 16 }}>{course.level}</p>
-                                        {/* Features */}
-                                        <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                                            {features.map((feat, i) => (
-                                                <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, color: '#d1d5db', fontSize: 14 }}>
-                                                    <span style={{ color: '#c9a84c', marginTop: 1, flexShrink: 0 }}>✓</span>
-                                                    <span>{feat}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                        {/* CTA */}
-                                        <button
-                                            onClick={() => setEnrollModal(course.title)}
-                                            style={{
-                                                marginTop: 32,
-                                                background: isMiddle ? '#c9a84c' : 'transparent',
-                                                color: isMiddle ? '#111' : '#fff',
-                                                border: isMiddle ? 'none' : '1.5px solid #4b5563',
-                                                fontWeight: 800, fontSize: 15,
-                                                padding: '14px', borderRadius: 12, cursor: 'pointer',
-                                                transition: 'all 0.2s', width: '100%'
-                                            }}
-                                            onMouseEnter={e => { e.currentTarget.style.background = '#c9a84c'; e.currentTarget.style.color = '#111'; e.currentTarget.style.border = 'none'; }}
-                                            onMouseLeave={e => {
-                                                e.currentTarget.style.background = isMiddle ? '#c9a84c' : 'transparent';
-                                                e.currentTarget.style.color = isMiddle ? '#111' : '#fff';
-                                                e.currentTarget.style.border = isMiddle ? 'none' : '1.5px solid #4b5563';
-                                            }}
+                                            background: isMiddle ? '#1f2937' : '#1a2032',
+                                            border: isMiddle ? '2px solid #c9a84c' : '1px solid #2d3748',
+                                            borderRadius: 20,
+                                            padding: '36px 28px',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            position: 'relative',
+                                            transition: 'transform 0.3s, box-shadow 0.3s',
+                                            boxShadow: isMiddle ? '0 20px 60px rgba(201,168,76,0.2)' : 'none',
+                                            height: '100%'
+                                        }}
+                                            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-8px)'; e.currentTarget.style.boxShadow = '0 20px 50px rgba(0,0,0,0.4)'; }}
+                                            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = isMiddle ? '0 20px 60px rgba(201,168,76,0.2)' : 'none'; }}
                                         >
-                                            Get Started
-                                        </button>
-                                    </div>
+                                            {isMiddle && (
+                                                <div style={{
+                                                    position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)',
+                                                    background: '#c9a84c', color: '#111', fontWeight: 800, fontSize: 12,
+                                                    padding: '4px 18px', borderRadius: 20, letterSpacing: 1, whiteSpace: 'nowrap'
+                                                }}>
+                                                    MOST POPULAR
+                                                </div>
+                                            )}
+                                            {/* Icon */}
+                                            <div style={{
+                                                width: 52, height: 52, borderRadius: 14, background: 'rgba(201,168,76,0.15)',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                fontSize: 26, marginBottom: 20, border: '1px solid rgba(201,168,76,0.3)'
+                                            }}>
+                                                {courseIcons[idx % courseIcons.length]}
+                                            </div>
+                                            <h3 style={{ color: '#fff', fontSize: 22, fontWeight: 800, margin: '0 0 6px' }}>{course.title}</h3>
+                                            <p style={{ color: '#c9a84c', fontSize: 14, fontWeight: 600, marginBottom: 16 }}>{course.level}</p>
+                                            {/* Features */}
+                                            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                                {features.map((feat, i) => (
+                                                    <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, color: '#d1d5db', fontSize: 14 }}>
+                                                        <span style={{ color: '#c9a84c', marginTop: 1, flexShrink: 0 }}>✓</span>
+                                                        <span>{feat}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                            {/* CTA */}
+                                            <button
+                                                onClick={() => setEnrollModal(course.title)}
+                                                style={{
+                                                    marginTop: 32,
+                                                    background: isMiddle ? '#c9a84c' : 'transparent',
+                                                    color: isMiddle ? '#111' : '#fff',
+                                                    border: isMiddle ? 'none' : '1.5px solid #4b5563',
+                                                    fontWeight: 800, fontSize: 15,
+                                                    padding: '14px', borderRadius: 12, cursor: 'pointer',
+                                                    transition: 'all 0.2s', width: '100%'
+                                                }}
+                                                onMouseEnter={e => { e.currentTarget.style.background = '#c9a84c'; e.currentTarget.style.color = '#111'; e.currentTarget.style.border = 'none'; }}
+                                                onMouseLeave={e => {
+                                                    e.currentTarget.style.background = isMiddle ? '#c9a84c' : 'transparent';
+                                                    e.currentTarget.style.color = isMiddle ? '#111' : '#fff';
+                                                    e.currentTarget.style.border = isMiddle ? 'none' : '1.5px solid #4b5563';
+                                                }}
+                                            >
+                                                Get Started
+                                            </button>
+                                        </div>
+                                    </AdminEditableWrapper>
                                 );
                             })}
                         </div>
@@ -428,15 +434,17 @@ const GallerySection = ({ announcements, images }) => {
             {announcements && announcements.length > 0 && (
                 <div className="max-w-4xl mx-auto mb-12">
                     <InteractiveArea className="w-full">
-                        <a href={announcements[0].link || "#"} target={announcements[0].link ? "_blank" : "_self"} rel="noreferrer" className="block w-full bg-gradient-to-r from-[var(--dark-blue)] to-[var(--primary-blue)] rounded-xl shadow-2xl p-8 relative overflow-hidden group transform transition duration-500 hover:scale-[1.02]">
-                            <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-white opacity-10 group-hover:scale-150 transition-transform duration-700 ease-in-out"></div>
-                            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
-                                <div>
-                                    <h3 className="text-sm font-bold tracking-wider text-[var(--accent-red)] uppercase mb-2">📢 Featured Announcement</h3>
-                                    <p className="text-white text-xl md:text-2xl font-semibold leading-relaxed">{announcements[0].message}</p>
+                        <AdminEditableWrapper type="announcement" data={announcements[0]}>
+                            <a href={announcements[0].link || "#"} target={announcements[0].link ? "_blank" : "_self"} rel="noreferrer" className="block w-full bg-gradient-to-r from-[var(--dark-blue)] to-[var(--primary-blue)] rounded-xl shadow-2xl p-8 relative overflow-hidden group transform transition duration-500 hover:scale-[1.02]">
+                                <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-white opacity-10 group-hover:scale-150 transition-transform duration-700 ease-in-out"></div>
+                                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+                                    <div>
+                                        <h3 className="text-sm font-bold tracking-wider text-[var(--accent-red)] uppercase mb-2">📢 Featured Announcement</h3>
+                                        <p className="text-white text-xl md:text-2xl font-semibold leading-relaxed">{announcements[0].message}</p>
+                                    </div>
                                 </div>
-                            </div>
-                        </a>
+                            </a>
+                        </AdminEditableWrapper>
                     </InteractiveArea>
                 </div>
             )}
@@ -446,13 +454,17 @@ const GallerySection = ({ announcements, images }) => {
                     <div className="flex scrolling-wrapper">
                         {[...displayImages, ...displayImages].map((img, index) => (
                             <div key={`${img.id}-${index}`} className="flex-shrink-0 w-[300px] md:w-[400px] mx-4 relative group">
-                                <img src={img.image_url} className="w-full h-64 object-cover rounded-lg shadow-xl" alt={img.title} />
-                                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-all duration-300 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                    <div className="text-center p-4">
-                                        <h4 className="text-white font-bold text-xl">{img.title}</h4>
-                                        {img.description && <p className="text-gray-200 mt-2 text-sm">{img.description}</p>}
+                                <AdminEditableWrapper type="gallery" data={img}>
+                                    <div className="w-full h-full relative">
+                                        <img src={img.image_url} className="w-full h-64 object-cover rounded-lg shadow-xl" alt={img.title} />
+                                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-all duration-300 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                            <div className="text-center p-4">
+                                                <h4 className="text-white font-bold text-xl">{img.title}</h4>
+                                                {img.description && <p className="text-gray-200 mt-2 text-sm">{img.description}</p>}
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
+                                </AdminEditableWrapper>
                             </div>
                         ))}
                     </div>
@@ -502,29 +514,31 @@ const TestimonialsSection = ({ testimonials }) => (
             <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
                 {testimonials.map(item => (
                     <InteractiveArea key={item.id} onHoverType="queen" className="w-full">
-                        <div className="bg-[var(--dark-blue)] text-white rounded-lg shadow-2xl p-8 flex flex-col h-full transform transition duration-300 hover:scale-[1.02]">
-                            <div className="flex items-center gap-6 mb-6">
-                                {item.avatar_url ? (
-                                    <img src={item.avatar_url} alt={item.student_name} className="w-20 h-20 rounded-full flex-shrink-0 ring-4 ring-[var(--accent-red)] p-1 object-cover" />
-                                ) : (
-                                    <div className="w-20 h-20 rounded-full flex-shrink-0 ring-4 ring-[var(--accent-red)] p-1 bg-white text-[var(--dark-blue)] flex items-center justify-center font-bold text-2xl">
-                                        {item.student_name.charAt(0)}
+                        <AdminEditableWrapper type="testimonial" data={item}>
+                            <div className="bg-[var(--dark-blue)] text-white rounded-lg shadow-2xl p-8 flex flex-col h-full transform transition duration-300 hover:scale-[1.02]">
+                                <div className="flex items-center gap-6 mb-6">
+                                    {item.avatar_url ? (
+                                        <img src={item.avatar_url} alt={item.student_name} className="w-20 h-20 rounded-full flex-shrink-0 ring-4 ring-[var(--accent-red)] p-1 object-cover" />
+                                    ) : (
+                                        <div className="w-20 h-20 rounded-full flex-shrink-0 ring-4 ring-[var(--accent-red)] p-1 bg-white text-[var(--dark-blue)] flex items-center justify-center font-bold text-2xl">
+                                            {item.student_name.charAt(0)}
+                                        </div>
+                                    )}
+                                    <div>
+                                        <h4 className="font-bold text-xl text-white">{item.student_name}</h4>
+                                        <span className="text-sm text-gray-300">{item.course_taken}</span>
+                                        <div className="mt-2 text-yellow-400 text-sm">{'★'.repeat(item.rating)}{'☆'.repeat(5 - item.rating)}</div>
                                     </div>
-                                )}
-                                <div>
-                                    <h4 className="font-bold text-xl text-white">{item.student_name}</h4>
-                                    <span className="text-sm text-gray-300">{item.course_taken}</span>
-                                    <div className="mt-2 text-yellow-400 text-sm">{'★'.repeat(item.rating)}{'☆'.repeat(5 - item.rating)}</div>
+                                </div>
+                                <div className="flex-grow">
+                                    <p className="text-lg italic text-gray-300 leading-relaxed relative">
+                                        <span className="text-4xl text-[var(--accent-red)] absolute -left-4 -top-4 opacity-50">"</span>
+                                        {item.review_text}
+                                        <span className="text-4xl text-[var(--accent-red)] absolute -bottom-8 opacity-50">"</span>
+                                    </p>
                                 </div>
                             </div>
-                            <div className="flex-grow">
-                                <p className="text-lg italic text-gray-300 leading-relaxed relative">
-                                    <span className="text-4xl text-[var(--accent-red)] absolute -left-4 -top-4 opacity-50">"</span>
-                                    {item.review_text}
-                                    <span className="text-4xl text-[var(--accent-red)] absolute -bottom-8 opacity-50">"</span>
-                                </p>
-                            </div>
-                        </div>
+                        </AdminEditableWrapper>
                     </InteractiveArea>
                 ))}
             </div>
@@ -591,28 +605,30 @@ const BlogSection = ({ blogs }) => {
                 ) : (
                     blogs.map(post => (
                         <InteractiveArea key={post.id} className="w-full h-full">
-                            <div className="bg-gray-50 rounded-lg shadow-lg overflow-hidden h-full flex flex-col transform hover:-translate-y-2 transition-transform duration-300">
-                                {post.image_url ? (
-                                    <img src={post.image_url} alt={post.title} className="w-full h-48 object-cover bg-gray-200" />
-                                ) : (
-                                    <div className="w-full h-48 bg-gradient-to-br from-[var(--dark-blue)] to-[var(--primary-blue)] flex items-center justify-center border-b">
-                                        <span className="text-white/60 font-medium tracking-widest uppercase text-4xl">♟</span>
+                            <AdminEditableWrapper type="blog" data={post}>
+                                <div className="bg-gray-50 rounded-lg shadow-lg overflow-hidden h-full flex flex-col transform hover:-translate-y-2 transition-transform duration-300">
+                                    {post.image_url ? (
+                                        <img src={post.image_url} alt={post.title} className="w-full h-48 object-cover bg-gray-200" />
+                                    ) : (
+                                        <div className="w-full h-48 bg-gradient-to-br from-[var(--dark-blue)] to-[var(--primary-blue)] flex items-center justify-center border-b">
+                                            <span className="text-white/60 font-medium tracking-widest uppercase text-4xl">♟</span>
+                                        </div>
+                                    )}
+                                    <div className="p-6 flex flex-col flex-grow">
+                                        <p className="text-sm font-semibold text-[var(--accent-red)] mb-2">{post.category}</p>
+                                        <h3 className="text-xl font-bold text-[var(--dark-blue)] mb-3 flex-grow">{post.title}</h3>
+                                        <p className="text-[var(--text-light)] mb-4">{post.excerpt}</p>
+                                        <button
+                                            onClick={() => {
+                                                // Extract numeric ID from composite params like "3-slug"
+                                                const slug = post.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+                                                navigate(`/blog/${post.id}-${slug}`);
+                                            }}
+                                            className="text-left font-bold text-[var(--primary-blue)] hover:underline mt-auto"
+                                        >Read More &rarr;</button>
                                     </div>
-                                )}
-                                <div className="p-6 flex flex-col flex-grow">
-                                    <p className="text-sm font-semibold text-[var(--accent-red)] mb-2">{post.category}</p>
-                                    <h3 className="text-xl font-bold text-[var(--dark-blue)] mb-3 flex-grow">{post.title}</h3>
-                                    <p className="text-[var(--text-light)] mb-4">{post.excerpt}</p>
-                                    <button
-                                        onClick={() => {
-                                            // Extract numeric ID from composite params like "3-slug"
-                                            const slug = post.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-                                            navigate(`/blog/${post.id}-${slug}`);
-                                        }}
-                                        className="text-left font-bold text-[var(--primary-blue)] hover:underline mt-auto"
-                                    >Read More &rarr;</button>
                                 </div>
-                            </div>
+                            </AdminEditableWrapper>
                         </InteractiveArea>
                     ))
                 )}
@@ -634,17 +650,19 @@ const FAQ = ({ faqs }) => {
                     ) : (
                         faqs.map((faq, index) => (
                             <InteractiveArea key={faq.id} className="w-full">
-                                <div className="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md">
-                                    <button onClick={() => toggleFAQ(index)} className="w-full flex justify-between items-center p-5 text-left font-semibold text-lg text-[var(--dark-blue)]">
-                                        <span>{faq.question}</span>
-                                        <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center text-[var(--primary-blue)]">
-                                            <span className={`transform transition-transform duration-300 ${openIndex === index ? 'rotate-45' : ''}`}>+</span>
+                                <AdminEditableWrapper type="faq" data={faq}>
+                                    <div className="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md">
+                                        <button onClick={() => toggleFAQ(index)} className="w-full flex justify-between items-center p-5 text-left font-semibold text-lg text-[var(--dark-blue)]">
+                                            <span>{faq.question}</span>
+                                            <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center text-[var(--primary-blue)]">
+                                                <span className={`transform transition-transform duration-300 ${openIndex === index ? 'rotate-45' : ''}`}>+</span>
+                                            </div>
+                                        </button>
+                                        <div className={`transition-all duration-500 ease-in-out ${openIndex === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+                                            <p className="px-5 pb-5 text-[var(--text-light)] whitespace-pre-wrap">{faq.answer}</p>
                                         </div>
-                                    </button>
-                                    <div className={`transition-all duration-500 ease-in-out ${openIndex === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-                                        <p className="px-5 pb-5 text-[var(--text-light)] whitespace-pre-wrap">{faq.answer}</p>
                                     </div>
-                                </div>
+                                </AdminEditableWrapper>
                             </InteractiveArea>
                         ))
                     )}
@@ -667,29 +685,39 @@ const HomePage = ({ setPage }) => {
         coaches: []
     });
 
-    useEffect(() => {
-        const fetchPublicData = async () => {
-            try {
-                const { postToApi } = await import('../utils/api.js');
-                const data = await postToApi('api_public.php', { action: 'get_public_content' });
-                if (data.status === 'success') {
-                    setPublicData({
-                        announcements: data.announcements || [],
-                        blogs: data.blogs || [],
-                        faqs: data.faqs || [],
-                        gallery: data.gallery || [],
-                        testimonials: data.testimonials || [],
-                        courses: data.courses || [],
-                        coaches: data.coaches || [],
-                        puzzles: data.puzzles || []
-                    });
-                }
-            } catch (err) {
-                console.error("Failed to fetch public content", err);
+    const fetchPublicData = useCallback(async () => {
+        try {
+            const { postToApi } = await import('../utils/api.js');
+            const data = await postToApi('api_public.php', { action: 'get_public_content' });
+            if (data.status === 'success') {
+                setPublicData({
+                    announcements: data.announcements || [],
+                    blogs: data.blogs || [],
+                    faqs: data.faqs || [],
+                    gallery: data.gallery || [],
+                    testimonials: data.testimonials || [],
+                    courses: data.courses || [],
+                    coaches: data.coaches || [],
+                    puzzles: data.puzzles || []
+                });
             }
-        };
-        fetchPublicData();
+        } catch (err) {
+            console.error("Failed to fetch public content", err);
+        }
     }, []);
+
+    useEffect(() => {
+        fetchPublicData();
+
+        const handleUpdate = () => {
+            fetchPublicData();
+        };
+
+        window.addEventListener('admin-content-updated', handleUpdate);
+        return () => {
+            window.removeEventListener('admin-content-updated', handleUpdate);
+        };
+    }, [fetchPublicData]);
 
     return (
         <main>
@@ -721,10 +749,12 @@ const HomePage = ({ setPage }) => {
                             <h2 className="text-4xl font-bold text-[var(--dark-blue)] mb-4">Puzzle of the Week</h2>
                             <p className="text-gray-600">Challenge yourself with our weekly tactical puzzle! Can you find the best continuation?</p>
                         </div>
-                        <InteractivePuzzleDisplay 
-                            puzzle={publicData.puzzles.find(p => p.is_weekly === 1) || publicData.puzzles[0]} 
-                            isWeekly={true} 
-                        />
+                        <AdminEditableWrapper type="puzzle" data={publicData.puzzles.find(p => p.is_weekly === 1) || publicData.puzzles[0]}>
+                            <InteractivePuzzleDisplay 
+                                puzzle={publicData.puzzles.find(p => p.is_weekly === 1) || publicData.puzzles[0]} 
+                                isWeekly={true} 
+                            />
+                        </AdminEditableWrapper>
                         <div className="text-center mt-8">
                             <button 
                                 onClick={() => setPage && setPage('Blog')}

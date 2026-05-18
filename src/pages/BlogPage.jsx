@@ -5,6 +5,7 @@ import { Chessboard } from 'react-chessboard';
 import Section from '../components/Section';
 import InteractivePuzzleDisplay from '../components/InteractivePuzzleDisplay';
 import InteractiveArea from '../components/InteractiveArea';
+import AdminEditableWrapper from '../components/AdminEditableWrapper';
 
 // --- PAGE-SPECIFIC ICONS ---
 const DownloadCloudIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M8 17l4 4 4-4"/><path d="M12 12v9"/><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/></svg>);
@@ -50,24 +51,26 @@ const FeaturedArticles = ({ posts }) => {
                 ) : (
                     posts.map((post) => (
                         <InteractiveArea key={post.id} className="w-full">
-                            <div className="bg-white rounded-lg shadow-lg overflow-hidden h-full flex flex-col transform hover:-translate-y-2 transition-transform duration-300">
-                                {post.image_url ? (
-                                    <img src={post.image_url} alt={post.title} className="w-full h-48 object-cover bg-gray-200" />
-                                ) : (
-                                    <div className="w-full h-48 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center border-b">
-                                        <span className="text-gray-400 font-medium tracking-widest uppercase">No Image</span>
+                            <AdminEditableWrapper type="blog" data={post}>
+                                <div className="bg-white rounded-lg shadow-lg overflow-hidden h-full flex flex-col transform hover:-translate-y-2 transition-transform duration-300">
+                                    {post.image_url ? (
+                                        <img src={post.image_url} alt={post.title} className="w-full h-48 object-cover bg-gray-200" />
+                                    ) : (
+                                        <div className="w-full h-48 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center border-b">
+                                            <span className="text-gray-400 font-medium tracking-widest uppercase">No Image</span>
+                                        </div>
+                                    )}
+                                    <div className="p-6 flex flex-col flex-grow">
+                                        <p className="text-sm font-semibold text-[var(--accent-red)] mb-2">{post.category}</p>
+                                        <h3 className="text-xl font-bold text-[var(--dark-blue)] mb-3 flex-grow">{post.title}</h3>
+                                        <p className="text-[var(--text-light)] mb-4">{post.excerpt}</p>
+                                        <button onClick={() => {
+                                            const slug = post.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+                                            navigate(`/blog/${post.id}-${slug}`);
+                                        }} className="text-left font-bold text-[var(--primary-blue)] hover:underline mt-auto">Read More &rarr;</button>
                                     </div>
-                                )}
-                                <div className="p-6 flex flex-col flex-grow">
-                                    <p className="text-sm font-semibold text-[var(--accent-red)] mb-2">{post.category}</p>
-                                    <h3 className="text-xl font-bold text-[var(--dark-blue)] mb-3 flex-grow">{post.title}</h3>
-                                    <p className="text-[var(--text-light)] mb-4">{post.excerpt}</p>
-                                    <button onClick={() => {
-                                        const slug = post.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-                                        navigate(`/blog/${post.id}-${slug}`);
-                                    }} className="text-left font-bold text-[var(--primary-blue)] hover:underline mt-auto">Read More &rarr;</button>
                                 </div>
-                            </div>
+                            </AdminEditableWrapper>
                         </InteractiveArea>
                     ))
                 )}
@@ -139,16 +142,18 @@ const PuzzleArchive = ({ puzzles, onSelectPuzzle }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredPuzzles.map(puzzle => (
                     <InteractiveArea key={puzzle.id} className="w-full">
-                        <div className="bg-white p-4 rounded-lg shadow-md text-[var(--text-dark)] flex flex-col justify-between h-full transform hover:shadow-xl hover:scale-105 transition-all duration-300">
-                            <div>
-                                <h4 className="text-xl font-bold mb-2 text-[var(--dark-blue)]">{puzzle.title}</h4>
-                                <p><strong>Difficulty:</strong> {puzzle.difficulty}</p>
-                                <p><strong>Theme:</strong> {puzzle.theme}</p>
+                        <AdminEditableWrapper type="puzzle" data={puzzle}>
+                            <div className="bg-white p-4 rounded-lg shadow-md text-[var(--text-dark)] flex flex-col justify-between h-full transform hover:shadow-xl hover:scale-105 transition-all duration-300">
+                                <div>
+                                    <h4 className="text-xl font-bold mb-2 text-[var(--dark-blue)]">{puzzle.title}</h4>
+                                    <p><strong>Difficulty:</strong> {puzzle.difficulty}</p>
+                                    <p><strong>Theme:</strong> {puzzle.theme}</p>
+                                </div>
+                                <button onClick={() => onSelectPuzzle(puzzle)} className="mt-4 text-white font-bold py-2 px-4 rounded-lg transition-colors w-full" style={{backgroundColor: 'var(--primary-blue)'}}>
+                                    Solve this Puzzle
+                                </button>
                             </div>
-                            <button onClick={() => onSelectPuzzle(puzzle)} className="mt-4 text-white font-bold py-2 px-4 rounded-lg transition-colors w-full" style={{backgroundColor: 'var(--primary-blue)'}}>
-                                Solve this Puzzle
-                            </button>
-                        </div>
+                        </AdminEditableWrapper>
                     </InteractiveArea>
                 ))}
             </div>
@@ -184,12 +189,14 @@ const PuzzleSection = ({ puzzles }) => {
         <Section bgColor="var(--light-bg)" divider="waves" dividerColor="var(--white)">
             <h2 className="text-4xl font-bold text-center text-[var(--dark-blue)] mb-12">Interactive Puzzles</h2>
             <div className="max-w-4xl mx-auto">
-                <InteractivePuzzleDisplay 
-                    puzzle={activePuzzle} 
-                    isWeekly={activePuzzle?.id === puzzleOfTheWeek?.id}
-                    onReset={handleResetToWeekly}
-                    puzzleRef={puzzleRef}
-                />
+                <AdminEditableWrapper type="puzzle" data={activePuzzle}>
+                    <InteractivePuzzleDisplay 
+                        puzzle={activePuzzle} 
+                        isWeekly={activePuzzle?.id === puzzleOfTheWeek?.id}
+                        onReset={handleResetToWeekly}
+                        puzzleRef={puzzleRef}
+                    />
+                </AdminEditableWrapper>
                 <PuzzleArchive puzzles={puzzles} onSelectPuzzle={handleSelectPuzzle} />
             </div>
         </Section>
@@ -237,21 +244,31 @@ const BlogPage = () => {
     const [blogs, setBlogs] = useState([]);
     const [puzzles, setPuzzles] = useState([]);
 
-    useEffect(() => {
-        const fetchPublicContent = async () => {
-            try {
-                const { postToApi } = await import('../utils/api.js');
-                const data = await postToApi('api_public.php', { action: 'get_public_content' });
-                if (data.status === 'success') {
-                    setBlogs(data.blogs || []);
-                    setPuzzles(data.puzzles || []);
-                }
-            } catch (err) {
-                console.error("Failed to fetch public content", err);
+    const fetchPublicContent = useCallback(async () => {
+        try {
+            const { postToApi } = await import('../utils/api.js');
+            const data = await postToApi('api_public.php', { action: 'get_public_content' });
+            if (data.status === 'success') {
+                setBlogs(data.blogs || []);
+                setPuzzles(data.puzzles || []);
             }
-        };
-        fetchPublicContent();
+        } catch (err) {
+            console.error("Failed to fetch public content", err);
+        }
     }, []);
+
+    useEffect(() => {
+        fetchPublicContent();
+
+        const handleUpdate = () => {
+            fetchPublicContent();
+        };
+
+        window.addEventListener('admin-content-updated', handleUpdate);
+        return () => {
+            window.removeEventListener('admin-content-updated', handleUpdate);
+        };
+    }, [fetchPublicContent]);
 
     return (
         <main>

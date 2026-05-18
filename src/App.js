@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 
 // Context and Global Components
 import { CursorProvider } from './context/CursorContext';
+import { AdminEditProvider } from './context/AdminEditContext';
 import CustomCursor from './components/CustomCursor';
 import Layout from './components/Layout';
+import VisualAdminToolbar from './components/VisualAdminToolbar';
 
 // Import all the pages
 import HomePage from './pages/HomePage';
@@ -133,37 +135,40 @@ const ProtectedRoute = ({ children }) => {
 function App() {
     return (
         <CursorProvider>
-            <StyleInjector />
-            <CustomCursor />
-            <Router>
-                <Routes>
-                    {/* Admin Routes */}
-                    <Route path="/login" element={<AdminLogin />} />
-                    <Route path="/admin/reset-password" element={<AdminResetPassword />} />
-                    <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
-                        <Route index element={<AdminDashboard />} />
-                        <Route path="leads" element={<AdminLeads />} />
-                        <Route path="enrolments" element={<AdminEnrolments />} />
-                        <Route path="courses" element={<AdminCourses />} />
-                        <Route path="coaches" element={<AdminCoaches />} />
-                        <Route path="blog" element={<AdminBlog />} />
-                        <Route path="announcements" element={<AdminAnnouncements />} />
-                        <Route path="faq" element={<AdminFAQ />} />
-                        <Route path="gallery" element={<AdminGallery />} />
-                        <Route path="testimonials" element={<AdminTestimonials />} />
-                        <Route path="puzzles" element={<AdminPuzzles />} />
-                    </Route>
-                    
-                    {/* Public Single Blog Post Route */}
-                    <Route path="/blog/:id" element={<SingleBlogPostPage />} />
+            <AdminEditProvider>
+                <StyleInjector />
+                <CustomCursor />
+                <Router>
+                    <VisualAdminToolbar />
+                    <Routes>
+                        {/* Admin Routes */}
+                        <Route path="/login" element={<AdminLogin />} />
+                        <Route path="/admin/reset-password" element={<AdminResetPassword />} />
+                        <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
+                            <Route index element={<AdminDashboard />} />
+                            <Route path="leads" element={<AdminLeads />} />
+                            <Route path="enrolments" element={<AdminEnrolments />} />
+                            <Route path="courses" element={<AdminCourses />} />
+                            <Route path="coaches" element={<AdminCoaches />} />
+                            <Route path="blog" element={<AdminBlog />} />
+                            <Route path="announcements" element={<AdminAnnouncements />} />
+                            <Route path="faq" element={<AdminFAQ />} />
+                            <Route path="gallery" element={<AdminGallery />} />
+                            <Route path="testimonials" element={<AdminTestimonials />} />
+                            <Route path="puzzles" element={<AdminPuzzles />} />
+                        </Route>
+                        
+                        {/* Public Single Blog Post Route */}
+                        <Route path="/blog/:id" element={<SingleBlogPostPage />} />
 
-                    {/* Individual Coach Profile Route */}
-                    <Route path="/coaches/:id" element={<CoachProfilePage />} />
+                        {/* Individual Coach Profile Route */}
+                        <Route path="/coaches/:id" element={<CoachProfilePage />} />
 
-                    {/* Public Site Catch-all (retains old state-based behavior) */}
-                    <Route path="/*" element={<PublicApp />} />
-                </Routes>
-            </Router>
+                        {/* Public Site Catch-all (retains old state-based behavior) */}
+                        <Route path="/*" element={<PublicApp />} />
+                    </Routes>
+                </Router>
+            </AdminEditProvider>
         </CursorProvider>
     );
 }
