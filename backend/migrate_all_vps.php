@@ -249,6 +249,36 @@ try {
     echo "<span style='color:red;'>✘ Error seeding default testimonials: " . htmlspecialchars($e->getMessage()) . "</span><br>";
 }
 
-echo "<br><b>Master migration complete! All 11 tables constructed and seeded with 100% correct matching columns!</b>";
+echo "<br><b>Master migration complete! All 11 tables constructed and seeded with 100% correct matching columns!</b><br>";
+
+// --- AUTOMATIC DIRECTORY CONFIGURATION ---
+echo "<br><b>Configuring uploads directory permissions...</b><br>";
+$uploadDir = __DIR__ . '/uploads';
+if (!is_dir($uploadDir)) {
+    if (mkdir($uploadDir, 0777, true)) {
+        echo "<span style='color:green;'>✔ Success: Created `backend/uploads/` directory.</span><br>";
+    } else {
+        echo "<span style='color:red;'>✘ Error: Failed to create `backend/uploads/` directory.</span><br>";
+    }
+} else {
+    echo "<span style='color:green;'>✔ Info: `backend/uploads/` directory already exists.</span><br>";
+}
+
+if (is_dir($uploadDir)) {
+    // Attempt to make it fully writeable recursively
+    if (chmod($uploadDir, 0777)) {
+        echo "<span style='color:green;'>✔ Success: Configured `backend/uploads/` permissions to 0777 (writeable).</span><br>";
+    } else {
+        echo "<span style='color:red;'>✘ Warning: Failed to chmod `backend/uploads/` to 0777.</span><br>";
+    }
+    
+    // Set the owner if running as root
+    if (function_exists('posix_getuid') && posix_getuid() === 0) {
+        @chown($uploadDir, 'www-data');
+        @chgrp($uploadDir, 'www-data');
+        echo "<span style='color:green;'>✔ Success: Set ownership of `backend/uploads/` to www-data.</span><br>";
+    }
+}
 ?>
+
 

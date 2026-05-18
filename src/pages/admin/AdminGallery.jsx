@@ -28,6 +28,12 @@ const AdminGallery = () => {
     const handleSave = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem('adminToken');
+        
+        if (!currentImage.id && !currentImage.image_file) {
+            alert('Please select an image file to upload!');
+            return;
+        }
+
         try {
             const action = currentImage.id ? 'update_gallery' : 'add_gallery';
             
@@ -48,6 +54,7 @@ const AdminGallery = () => {
 
             const data = await postFormDataToApi('api_admin_dashboard.php', formData);
             if (data.status === 'success') {
+
                 setIsEditing(false);
                 setCurrentImage({ id: null, title: '', description: '', image_file: null, image_url: '', is_active: 1 });
                 fetchGallery();
