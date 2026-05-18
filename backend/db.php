@@ -20,11 +20,10 @@ if ($_SERVER['SERVER_NAME'] == 'localhost' || $_SERVER['SERVER_NAME'] == '127.0.
     $username = "root";
     $password = "";
 } else {
-    // LIVE (cPanel)
-    // Update these with the actual details from cPanel MySQL Database Wizard
-    $db_name = "skillsak_mkchess";
-    $username = "skillsak_mkuser";
-    $password = "BOHPM6139n@";
+    // LIVE (VPS)
+    $db_name = "mkchess_vps";
+    $username = "mkchess_user";
+    $password = "Rajugari@2026";
 }
 
 try {
